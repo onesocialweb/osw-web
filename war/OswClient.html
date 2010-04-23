@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="gwt:property" content="locale=en">
+
+<title>OneSocialWeb</title>
+
+<link type="text/css" rel="stylesheet" href="standard.css">
+<link type="text/css" rel="stylesheet" href="themes/osw/OswClient.css">
+
+</head>
+
+<body id="index" class="home">
+<iframe id="upload" name="upload"
+	style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+	style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+<div id="wrapper"></div>
+<div id="mainmenuwrapper"></div>
+<div id="applicationwrapper"></div>
+<div id="credits">Web Client v0.6<br/>Powered by <a href="http://onesocialweb.org">OneSocialWeb</a></div>
+
+<script type="text/javascript" language="javascript"
+	src="OswClient/OswClient.nocache.js"></script>
+<script type="text/javascript" language="javascript">
+  		var preferences = {
+
+			// It is easy to change the styling of this client, just point this variable to another theme folder  		  		
+		  	theme_folder: "themes/osw/",
+
+		  	// What name to use when presenting this service to the user
+		  	service_name: "Onesocialweb",
+
+		  	// The XMPP server to which this client can connect over BOSH. Carefull that most browsers 
+		  	// won't allow connecting to a host which is not the same as the one serving these pages
+		  	bosh_host: "localhost", 
+
+		  	// Absolute path to the BOSH endpoint
+		  	bosh_path: "/OswClient/bosh",
+
+		  	// What the XMPP domain is
+		  	xmpp_domain: "vodafonernd.com",
+
+		  	// Absolute path to the file servlet
+		  	upload_endpoint: "/OswClient/file",
+		  	file_retrieval_endpoint: "http://osw.vodafonernd.com/file",
+
+		  	// If true, we may do a bit more of logging
+			developer_mode: "true"
+		};
+	</script>
+
+</body>
+</html>
