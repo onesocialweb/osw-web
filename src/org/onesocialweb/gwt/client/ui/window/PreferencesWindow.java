@@ -32,7 +32,6 @@ import org.onesocialweb.gwt.client.ui.widget.StyledTextBox;
 import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
-import org.onesocialweb.gwt.xml.XMLHelper;
 import org.onesocialweb.model.vcard4.BirthdayField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
@@ -394,18 +393,15 @@ public class PreferencesWindow extends AbstractWindow {
 				try {
 					// prepare for updating and check for empty values
 					if (avatarF.getText().length() > 0)
-						profile.addField(profileFactory.photo(XMLHelper
-								.encode(avatarF.getText())));
+						profile.addField(profileFactory.photo(avatarF.getText()));
 					if (displaynameF.getText().length() > 0)
-						profile.addField(profileFactory.fullname(XMLHelper
-								.encode(displaynameF.getText())));
+						profile.addField(profileFactory.fullname(displaynameF.getText()));
 					// if (birthdayF.getText().length() > 0)
 					// profile.addField(profileFactory.birthday(birthdayF.getText()));
 					// if (genderF.getText().length() > 0)
 					// profile.addField(profileFactory.gender(genderF.getText());
 					if (bioF.getText().length() > 0)
-						profile.addField(profileFactory.note(XMLHelper
-								.encode(bioF.getText())));
+						profile.addField(profileFactory.note(bioF.getText()));
 					// if (utcOffsetF.getText().length() > 0)
 					// profile.addField(profileFactory.singularField("utcOffset",
 					// utcOffsetF.getText()));

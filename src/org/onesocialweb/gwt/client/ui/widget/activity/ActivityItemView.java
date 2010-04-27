@@ -38,7 +38,6 @@ import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
 import org.onesocialweb.gwt.service.RosterItem.Presence;
 import org.onesocialweb.gwt.util.Observer;
-import org.onesocialweb.gwt.xml.XMLHelper;
 import org.onesocialweb.model.acl.AclAction;
 import org.onesocialweb.model.acl.AclRule;
 import org.onesocialweb.model.acl.AclSubject;
@@ -60,7 +59,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 
 public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
@@ -120,7 +118,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 								// show display name
 								final String fullName = result.getFullName();
 								if (fullName != null && fullName.length() > 0) {
-									label.setHTML(XMLHelper.encode(fullName));
+									label.setText(fullName);
 								}
 
 							}
@@ -186,7 +184,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			}
 		}
 
-		statusLabel.setHTML(" - " + XMLHelper.encode(activity.getTitle()));
+		statusLabel.setText(" - " + activity.getTitle());
 		String info = "";
 		info += getFormattedDate(activity.getPublished());
 		if (!visibility.isEmpty())
@@ -194,7 +192,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		// if (location != "") info += " - From: " + location;
 		// if (tags != "") info += " - Tagged: " + tags;
 
-		infoLabel.setHTML(XMLHelper.encode(info));
+		infoLabel.setText(info);
 		author.setTitle("View profile of " + activity.getActor().getUri());
 
 		// check for any attachments
@@ -385,7 +383,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 						// object.getTitle()
 						if (!activity.getTitle().trim().equals(
 								object.getLinks().get(i).getTitle().trim())) {
-							title.setHTML(XMLHelper.encode(object.getLinks().get(i).getTitle()));
+							title.setText(object.getLinks().get(i).getTitle());
 						}
 
 					}
@@ -393,7 +391,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 					// otherwise we can show it
 					// TODO this needs to be refactored to the object.getTitle()
 				} else {
-					title.setHTML(XMLHelper.encode(object.getLinks().get(i).getTitle()));
+					title.setText(object.getLinks().get(i).getTitle());
 				}
 
 				attachmentFlow.add(image);
@@ -411,7 +409,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		if (object.hasContents()
 				&& object.getContents().get(0).getValue() != null
 				&& object.getContents().get(0).getValue().length() > 0) {
-			description.setHTML(XMLHelper.encode(object.getContents().get(0).getValue()));
+			description.setText(object.getContents().get(0).getValue());
 			wrapper.add(description);
 		}
 

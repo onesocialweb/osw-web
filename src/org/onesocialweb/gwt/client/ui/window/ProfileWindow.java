@@ -38,8 +38,8 @@ import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
+import org.onesocialweb.gwt.util.HtmlHelper;
 import org.onesocialweb.gwt.util.Observer;
-import org.onesocialweb.gwt.xml.XMLHelper;
 import org.onesocialweb.model.vcard4.BirthdayField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
@@ -193,7 +193,7 @@ public class ProfileWindow extends AbstractWindow {
 		if (model != null) {
 			fullName = model.getFullName();
 			if (fullName != null && fullName.length() > 0) {
-				displayname.setHTML(XMLHelper.encode(fullName));
+				displayname.setText(fullName);
 			} else {
 				displayname.setText(jid);
 			}
@@ -262,7 +262,7 @@ public class ProfileWindow extends AbstractWindow {
 			if (model.getNote() != null) {
 				if (model != null && bio != null && bio.length() > 0) {
 					StyledLabel aboutme = new StyledLabel("aboutme",
-							"<span>Bio </span> " + XMLHelper.encode(bio));
+							"<span>Bio </span> " + HtmlHelper.encode(bio));
 					summary.add(aboutme);
 				}
 			}
@@ -276,7 +276,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// add tags if any
 		if (tags.length() > 0) {
-			tagged.setHTML("<span>On your lists </span> " + XMLHelper.encode(tags));
+			tagged.setHTML("<span>On your lists </span> " + HtmlHelper.encode(tags));
 		} else {
 			tagged.setHTML("");
 		}
@@ -482,21 +482,21 @@ public class ProfileWindow extends AbstractWindow {
 			// tab
 			if (model.hasField(FullNameField.NAME)
 					&& FullNameField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Full name", XMLHelper.encode(model.getFullName()));
+				addHTMLLabelRow(profile, "Full name", model.getFullName());
 			}
 
 			if (model.hasField(BirthdayField.NAME)
 					&& BirthdayField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Birthday", XMLHelper.encode(model.getBirthday().toString()));
+				addHTMLLabelRow(profile, "Birthday", model.getBirthday().toString());
 			}
 
 			if (model.hasField(GenderField.NAME)
 					&& GenderField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Gender", XMLHelper.encode(model.getGender().toString()));
+				addHTMLLabelRow(profile, "Gender", model.getGender().toString());
 			}
 
 			if (model.hasField(NoteField.NAME) && NoteField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Bio", XMLHelper.encode(model.getNote()));
+				addHTMLLabelRow(profile, "Bio", model.getNote());
 			}
 
 		} else {

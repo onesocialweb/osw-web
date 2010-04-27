@@ -31,7 +31,6 @@ import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.gwt.util.ListModel;
-import org.onesocialweb.gwt.xml.XMLHelper;
 import org.onesocialweb.model.acl.AclAction;
 import org.onesocialweb.model.acl.AclRule;
 import org.onesocialweb.model.acl.AclSubject;
@@ -100,7 +99,7 @@ public class NewActivityPanel extends Composite {
 		final AtomFactory atomFactory = service.getAtomFactory();
 
 		Date now = new Date();
-		String status = XMLHelper.encode(textareaUpdate.getText());
+		String status = textareaUpdate.getText();
 
 		ActivityObject object = service.getActivityFactory().object(
 				ActivityObject.STATUS_UPDATE);

@@ -32,7 +32,6 @@ import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
 import org.onesocialweb.gwt.service.RosterItem.Presence;
 import org.onesocialweb.gwt.util.Observer;
-import org.onesocialweb.gwt.xml.XMLHelper;
 import org.onesocialweb.model.vcard4.Profile;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -165,7 +164,7 @@ public class ContactItemView extends FlowPanel implements MouseOverHandler,
 
 				String displayName = result.getFullName();
 				if (displayName != null) {
-					author.setHTML(XMLHelper.encode(displayName));
+					author.setText(displayName);
 				} else {
 					author.setText(rosterItem.getJid());
 				}

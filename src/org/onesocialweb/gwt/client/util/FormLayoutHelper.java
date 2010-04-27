@@ -30,7 +30,7 @@ public class FormLayoutHelper {
 		target.addCell(target.getRowCount() - 1);
 		target.addCell(target.getRowCount() - 1);
 		target.setText(target.getRowCount() - 1, 0, label);
-		target.setHTML(target.getRowCount() - 1, 1, value);
+		target.setText(target.getRowCount() - 1, 1, value);
 
 		target.addStyleName("fields");
 
