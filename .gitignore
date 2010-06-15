@@ -2,6 +2,7 @@
 .project
 .settings
 war/OswClient
+war/OswClient.html
 war/WEB-INF/classes
 war/WEB-INF/web.xml
 .DS_Store
