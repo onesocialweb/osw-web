@@ -55,11 +55,11 @@ public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 				// make sure to remove the selected state. Mouseout is not
 				// always captured
 				if (lastSelected != null) {
-					lastSelected.removeStyleName("selected");
+					lastSelected.removeSelect();
 				}
 				// force selecting the activity
 				if (!sa.getStyleName().equals("selected")) {
-					sa.addStyleName("selected");
+					sa.addSelect();
 					lastSelected = sa;
 				}
 				

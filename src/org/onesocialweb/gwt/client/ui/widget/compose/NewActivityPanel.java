@@ -174,7 +174,7 @@ public class NewActivityPanel extends Composite {
 					ActivityObject object = service.getActivityFactory()
 							.object(ActivityObject.PICTURE);
 					object.addLink(service.getAtomFactory().link(pictureUrl,
-							"alternate", null, null));
+							"alternate", null, null, 0));
 					pictureAttachments.add(object);
 				}
 			}

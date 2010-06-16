@@ -1186,6 +1186,10 @@ img.logo {
 .isOwner {
 	background: #dbe4ed; 
 	}
+	
+.isOwner .selected {
+	background: #e7edf3; 
+	}
 
 .selected{
 	background: rgb(240,240,240);

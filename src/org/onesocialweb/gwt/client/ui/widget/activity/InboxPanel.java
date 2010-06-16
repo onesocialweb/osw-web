@@ -43,8 +43,9 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
 				
-				// pass the Id for editing, deleting etc.
+				// pass info for editing, deleting etc.
 				buttons.setActivityId(activityEntry.getId());
+				buttons.setActivityItemView(sa);
 				
 				// only show options like edit and delete for own items
 				if (activityEntry.getActor().getUri().equals(OswServiceFactory.getService().getUserBareJID())) {
@@ -56,11 +57,11 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 				// make sure to remove the selected state. Mouseout is not
 				// always captured
 				if (lastSelected != null) {
-					lastSelected.removeStyleName("selected");
+					lastSelected.removeSelect();
 				}
 				// force selecting the activity
 				if (!sa.getStyleName().equals("selected")) {
-					sa.addStyleName("selected");
+					sa.addSelect();
 					lastSelected = sa;
 				}
 				

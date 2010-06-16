@@ -38,8 +38,10 @@ import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
+import org.onesocialweb.gwt.service.Stream;
 import org.onesocialweb.gwt.util.HtmlHelper;
 import org.onesocialweb.gwt.util.Observer;
+import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.vcard4.BirthdayField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
@@ -165,8 +167,8 @@ public class ProfileWindow extends AbstractWindow {
 				+ "assets/i-chat.png"), "Chat with this person");
 		FlowPanel activities = new FlowPanel();
 		FeedPanel activityPanel = new FeedPanel();
-		activityPanel.setModel(OswServiceFactory.getService()
-				.getActivities(jid));
+		Stream<ActivityEntry> userActivities = OswServiceFactory.getService().getActivities(jid);
+		activityPanel.setModel(userActivities);
 
 		// User avatar
 		Image avatar = new Image();

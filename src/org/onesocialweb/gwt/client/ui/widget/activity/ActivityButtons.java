@@ -49,8 +49,9 @@ public class ActivityButtons extends FlowPanel {
 
 	private String activityId = "";
 	private AbstractActivityPanel<ActivityEntry> panel;
+	private ActivityItemView activityItemView;
 	
-	public ActivityButtons(AbstractActivityPanel<ActivityEntry> panel) {
+	public ActivityButtons(final AbstractActivityPanel<ActivityEntry> panel) {
 		this.panel = panel;
 		addStyleName("activityButtons");
 		add(buttonComment);
@@ -101,7 +102,7 @@ public class ActivityButtons extends FlowPanel {
 						"Deleting activity", false);
 				TaskMonitor.getInstance().addTask(task);
 				
-				// disable the UI
+				// set the item to updating and disable the buttons
 				disable();
 				
 				OswService service = OswServiceFactory.getService();
@@ -120,6 +121,7 @@ public class ActivityButtons extends FlowPanel {
 						public void onSuccess(Object result) {
 							task.complete("", Status.succes);
 							enable();
+							panel.repaint();
 							setVisible(false);
 						}
 					});
@@ -131,6 +133,10 @@ public class ActivityButtons extends FlowPanel {
 	
 	public void setActivityId(String activityId) {
 		this.activityId = activityId;
+	}
+	
+	public void setActivityItemView(ActivityItemView activityItemView) {
+		this.activityItemView = activityItemView;
 	}
 	
 	public void showLoggedInOptions() {
@@ -147,6 +153,7 @@ public class ActivityButtons extends FlowPanel {
 		buttonLike.setEnabled(false);
 		buttonShare.setEnabled(false);
 		buttonDelete.setEnabled(false);
+		panel.setUpdating(false);
 	}
 	
 	private void enable() {
@@ -155,6 +162,7 @@ public class ActivityButtons extends FlowPanel {
 		buttonLike.setEnabled(true);
 		buttonShare.setEnabled(true);
 		buttonDelete.setEnabled(true);
+		panel.setUpdating(true);
 	}
 
 }

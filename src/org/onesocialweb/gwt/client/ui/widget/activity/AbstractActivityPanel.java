@@ -36,6 +36,8 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
 	private DefaultTaskInfo task;
 
+	private boolean update = true;
+
 	public void setModel(Stream<T> model) {
 		this.model = model;
 
@@ -44,6 +46,14 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
 		// Repaint a first time
 		repaint();
+	}
+	
+	public boolean isUpdating() {
+		return update;
+	}
+	
+	public void setUpdating(boolean shouldUpdate) {
+		update = shouldUpdate;
 	}
 
 	protected abstract Widget render(T item);
@@ -84,7 +94,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 			insert(render(item), 0);
 		}
 	}
-	
+
 	private void removeItem(T item) {
 		Widget w = render(item);
 		if (w != null) {
@@ -96,12 +106,18 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
 		@Override
 		public void handleEvent(StreamEvent<T> event) {
-			if (event.getType().equals(Type.added)) {
-				for (T item : event.getItems()) {
-					showItem(item);
+			if (update) {
+				if (event.getType().equals(Type.added)) {
+					for (T item : event.getItems()) {
+						showItem(item);
+					}
+				//} else if (event.getType().equals(Type.removed)) {
+				//	for (T item : event.getItems()) {
+				//		removeItem(item);
+				//	}
+				} else {
+					repaint();
 				}
-			} else {
-				repaint();
 			}
 		}
 

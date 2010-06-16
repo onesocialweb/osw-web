@@ -80,13 +80,14 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 	private ActivityButtonHandler handler;
 	private final ActivityEntry activity;
+	private boolean isUpdating = false;
+	
+	private StyledFlowPanel statusActivity = new StyledFlowPanel("statusActivity");
 	
 	private StyledLabel author = new StyledLabel("link", "");
 
 	public ActivityItemView(final ActivityEntry activity) {
 		this.activity = activity;
-		
-		StyledFlowPanel statusActivityWrapper = new StyledFlowPanel("statusActivityWrapper");
 		
 		// add the mouseOver handlers
 		this.addMouseOverHandler(this);
@@ -194,7 +195,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			}
 			
 			// and add a special style to show this is your own item
-			this.addStyleName("isOwner");
+			addStyleName("isOwner");
 		}
 
 		statusLabel.setText(" - " + activity.getTitle());
@@ -219,13 +220,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			}
 		}
 		
-		statusActivityWrapper.add(hpanel);
-		add(statusActivityWrapper);
+		statusActivity.add(hpanel);
+		add(statusActivity);
 
 		// add styles
 		avatarImage.setStyleName("avatar");
 		infoLabel.setStyleName("info");
-		addStyleName("statusActivity");
+		addStyleName("statusActivityWrapper");
 
 		// handlers
 		author.addClickHandler(new ClickHandler() {
@@ -329,16 +330,24 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		this.handler = handler;
 	}
 
+	public void removeSelect() {
+		statusActivity.removeStyleName("selected");
+	}
+	
+	public void addSelect() {
+		statusActivity.addStyleName("selected");
+	}
+	
 	private void select() {
-		addStyleName("selected");
+		statusActivity.addStyleName("selected");
 		handler.handleShow(this.getAbsoluteTop(), this);
 	}
 
 	private void deselect() {
-		removeStyleName("selected");
+		statusActivity.removeStyleName("selected");
 		handler.handleHide();
 	}
-
+	
 	private void showComments() {
 		// addComment();
 	}
