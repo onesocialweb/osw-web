@@ -84,6 +84,13 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 			insert(render(item), 0);
 		}
 	}
+	
+	private void removeItem(T item) {
+		Widget w = render(item);
+		if (w != null) {
+			remove(render(item));
+		}
+	}
 
 	private class StreamListener implements Observer<StreamEvent<T>> {
 

@@ -105,7 +105,7 @@ public class ContactPanel extends AbstractContactPanel<ContactItemView> {
 						showButtons(top);
 						buttons.setJID(rosterItem.getJid());
 					}
-					// force selecting the activity
+					// force selecting the contact
 					if (!contact.getStyleName().equals("selected")) {
 						contact.addStyleName("selected");
 						lastSelected = contact;

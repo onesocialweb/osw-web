@@ -17,13 +17,14 @@
 package org.onesocialweb.gwt.client.ui.widget.activity;
 
 import org.onesocialweb.gwt.client.handler.ActivityButtonHandler;
+import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.model.activity.ActivityEntry;
 
 import com.google.gwt.user.client.ui.Widget;
 
 public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 
-	private final ActivityButtons buttons = new ActivityButtons();
+	private final ActivityButtons buttons = new ActivityButtons(this);
 
 	private ActivityItemView lastSelected;
 
@@ -36,20 +37,33 @@ public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 	}
 
 	@Override
-	protected Widget render(ActivityEntry activity) {
-		ActivityItemView sa = new ActivityItemView(activity);
+	protected Widget render(final ActivityEntry activityEntry) {
+		ActivityItemView sa = new ActivityItemView(activityEntry);
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
-
+				
+				// pass the Id for editing, deleting etc.
+				buttons.setActivityId(activityEntry.getId());
+				
+				// only show options like edit and delete for own items
+				if (activityEntry.getActor().getUri().equals(OswServiceFactory.getService().getUserBareJID())) {
+					buttons.showLoggedInOptions();
+				} else {
+					buttons.hideLoggedInOptions();
+				}
+				
 				// make sure to remove the selected state. Mouseout is not
 				// always captured
-				if (lastSelected != null)
+				if (lastSelected != null) {
 					lastSelected.removeStyleName("selected");
-				showButtons(top);
+				}
 				// force selecting the activity
-				if (!sa.getStyleName().equals("selected"))
+				if (!sa.getStyleName().equals("selected")) {
 					sa.addStyleName("selected");
-				lastSelected = sa;
+					lastSelected = sa;
+				}
+				
+				showButtons(top);
 			}
 
 			public void handleHide() {

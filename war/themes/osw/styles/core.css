@@ -1183,6 +1183,10 @@ img.logo {
 	width: 100%;
 }
 
+.isOwner {
+	background: #dbe4ed; 
+	}
+
 .selected{
 	background: rgb(240,240,240);
 }

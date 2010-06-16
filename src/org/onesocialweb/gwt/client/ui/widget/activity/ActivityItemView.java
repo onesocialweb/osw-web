@@ -80,18 +80,26 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 	private ActivityButtonHandler handler;
 	private final ActivityEntry activity;
+	
+	private StyledLabel author = new StyledLabel("link", "");
 
 	public ActivityItemView(final ActivityEntry activity) {
 		this.activity = activity;
-
+		
+		StyledFlowPanel statusActivityWrapper = new StyledFlowPanel("statusActivityWrapper");
+		
+		// add the mouseOver handlers
+		this.addMouseOverHandler(this);
+		this.addMouseOutHandler(this);
+		
 		// Place the check above the text box using a vertical panel.
 		StyledFlowPanel flow = new StyledFlowPanel("contents");
 		StyledFlowPanel statuswrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
 		StyledFlowPanel infowrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");
-		StyledLabel author = new StyledLabel("link", activity.getActor()
-				.getName());
+		
+		author.setText(activity.getActor().getName());
 		authorWrapper.add(author);
 		final OswService service = OswServiceFactory.getService();
 
@@ -168,6 +176,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 		if (activity.getActor().getUri().equals(
 				OswServiceFactory.getService().getUserBareJID())) {
+			
+			// show the acl rule
 			for (AclRule rule : activity.getAclRules()) {
 				for (AclAction action : rule.getActions(AclAction.ACTION_VIEW,
 						AclAction.PERMISSION_GRANT)) {
@@ -182,6 +192,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 					}
 				}
 			}
+			
+			// and add a special style to show this is your own item
+			this.addStyleName("isOwner");
 		}
 
 		statusLabel.setText(" - " + activity.getTitle());
@@ -205,8 +218,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				addLinkAttachment(activity.getObjects().get(i));
 			}
 		}
-
-		add(hpanel);
+		
+		statusActivityWrapper.add(hpanel);
+		add(statusActivityWrapper);
 
 		// add styles
 		avatarImage.setStyleName("avatar");
@@ -226,9 +240,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				profileWindow.show();
 			}
 		});
-
-		this.addMouseOverHandler(this);
-		this.addMouseOutHandler(this);
 
 		// Fetch the avatar image
 		service.getProfile(activity.getActor().getUri(),

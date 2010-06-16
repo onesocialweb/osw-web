@@ -17,8 +17,16 @@
 package org.onesocialweb.gwt.client.ui.widget.activity;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
+import org.onesocialweb.gwt.client.task.TaskMonitor;
+import org.onesocialweb.gwt.client.task.TaskInfo.Status;
 import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
+import org.onesocialweb.gwt.service.OswService;
+import org.onesocialweb.gwt.service.OswServiceFactory;
+import org.onesocialweb.gwt.service.RequestCallback;
+import org.onesocialweb.gwt.service.RosterItem;
+import org.onesocialweb.model.activity.ActivityEntry;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,16 +43,20 @@ public class ActivityButtons extends FlowPanel {
 	private TooltipPushButton buttonShare = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
 					+ "assets/i-share.png"), "Share");
-	private TooltipPushButton buttonMore = new TooltipPushButton(new Image(
+	private TooltipPushButton buttonDelete = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
-					+ "assets/i-more.png"), "More options");
+			+ "assets/i-delete.png"), "Delete");
 
-	public ActivityButtons() {
+	private String activityId = "";
+	private AbstractActivityPanel<ActivityEntry> panel;
+	
+	public ActivityButtons(AbstractActivityPanel<ActivityEntry> panel) {
+		this.panel = panel;
 		addStyleName("activityButtons");
 		add(buttonComment);
 		add(buttonLike);
 		add(buttonShare);
-		add(buttonMore);
+		add(buttonDelete);
 
 		buttonComment.addClickHandler(new ClickHandler() {
 
@@ -79,16 +91,70 @@ public class ActivityButtons extends FlowPanel {
 
 		});
 
-		buttonMore.addClickHandler(new ClickHandler() {
+		buttonDelete.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				AlertDialog.getInstance().showDialog(
-						"Sorry this feature is not yet implemented.",
-						"We're working on this");
+				
+				// Add message in task bar
+				final DefaultTaskInfo task = new DefaultTaskInfo(
+						"Deleting activity", false);
+				TaskMonitor.getInstance().addTask(task);
+				
+				// disable the UI
+				disable();
+				
+				OswService service = OswServiceFactory.getService();
+				
+				if (activityId.length() > 0) {
+					service.delete(activityId, new RequestCallback<Object>() {
+
+						@Override
+						public void onFailure() {
+							task.complete("", Status.failure);
+							enable();
+							AlertDialog.getInstance().showDialog("Could not delete the item.", "Oops");
+						}
+
+						@Override
+						public void onSuccess(Object result) {
+							task.complete("", Status.succes);
+							enable();
+							setVisible(false);
+						}
+					});
+				}
 			}
 
 		});
+	}
+	
+	public void setActivityId(String activityId) {
+		this.activityId = activityId;
+	}
+	
+	public void showLoggedInOptions() {
+		buttonDelete.setVisible(true);
+	}
+	
+	public void hideLoggedInOptions() {
+		buttonDelete.setVisible(false);
+	}
+	
+	private void disable() {
+		// temporarily disable the UI while processing request
+		buttonComment.setEnabled(false);
+		buttonLike.setEnabled(false);
+		buttonShare.setEnabled(false);
+		buttonDelete.setEnabled(false);
+	}
+	
+	private void enable() {
+		// enable the UI after processing request
+		buttonComment.setEnabled(true);
+		buttonLike.setEnabled(true);
+		buttonShare.setEnabled(true);
+		buttonDelete.setEnabled(true);
 	}
 
 }
