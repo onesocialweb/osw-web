@@ -129,10 +129,8 @@ public class ProfileWindow extends AbstractWindow {
 
 						task.complete("", Status.failure);
 						model = null;
-						AlertDialog
-								.getInstance()
-								.showDialog(
-										"Maybe the account does not exist anyomore or the server is not available at the moment. This is why some features like following and shouting will not work for now.",
+						AlertDialog.getInstance().showDialog(
+										"Maybe the account does not exist anymore or the server is not available at the moment. This is why some features like following and shouting will not work for now.",
 										"Please note!");
 						composeWindow();
 						hasProfile = false;

@@ -33,11 +33,16 @@ import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.model.vcard4.BirthdayField;
+import org.onesocialweb.model.vcard4.EmailField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
+import org.onesocialweb.model.vcard4.NameField;
 import org.onesocialweb.model.vcard4.NoteField;
 import org.onesocialweb.model.vcard4.PhotoField;
 import org.onesocialweb.model.vcard4.Profile;
+import org.onesocialweb.model.vcard4.TelField;
+import org.onesocialweb.model.vcard4.TimeZoneField;
+import org.onesocialweb.model.vcard4.URLField;
 import org.onesocialweb.model.vcard4.VCard4Factory;
 import org.onesocialweb.model.vcard4.exception.CardinalityException;
 import org.onesocialweb.model.vcard4.exception.UnsupportedFieldException;
@@ -176,8 +181,7 @@ public class PreferencesWindow extends AbstractWindow {
 		// Advanced settings status
 		FlexTable advancedStatus = new FlexTable();
 		PrivacySelector advancedstatus = new PrivacySelector("advancedstatus");
-		addWidgetRow(advancedStatus, "See your status updates", advancedstatus,
-				"");
+		addWidgetRow(advancedStatus, "See your status updates", advancedstatus);
 		disclosureStatus.add(advancedStatus);
 
 		// Simple privacy settings
@@ -186,22 +190,22 @@ public class PreferencesWindow extends AbstractWindow {
 		simple.addStyleName("privacy");
 
 		PrivacySelector status = new PrivacySelector("status");
-		addWidgetRow(simple, "See your posts", status, "");
+		addWidgetRow(simple, "See your posts", status);
 
 		PrivacySelector comment = new PrivacySelector("status");
-		addWidgetRow(simple, "Comment on your posts", comment, "");
+		addWidgetRow(simple, "Comment on your posts", comment);
 
 		PrivacySelector profile = new PrivacySelector("profile");
-		addWidgetRow(simple, "See your profile information", profile, "");
+		addWidgetRow(simple, "See your profile information", profile);
 
 		PrivacySelector contact = new PrivacySelector("contact");
-		addWidgetRow(simple, "See your contact information", contact, "");
+		addWidgetRow(simple, "See your contact information", contact);
 
 		PrivacySelector following = new PrivacySelector("following");
-		addWidgetRow(simple, "See people you're following", following, "");
+		addWidgetRow(simple, "See people you're following", following);
 
 		PrivacySelector friends = new PrivacySelector("friends");
-		addWidgetRow(simple, "See your friends", friends, "");
+		addWidgetRow(simple, "See your friends", friends);
 
 		sectionSimple.add(simple);
 		privacy.add(sectionSimple);
@@ -253,6 +257,12 @@ public class PreferencesWindow extends AbstractWindow {
 			if (displayname != null && displayname.length() > 0)
 				addHTMLLabelRow(general, "Display name", displayname);
 		}
+		
+		if (model.hasField(NameField.NAME)) {
+			String name = model.getName();
+			if (name != null && name.length() > 0)
+				addHTMLLabelRow(general, "Name", name);
+		}
 
 		if (model.hasField(BirthdayField.NAME)) {
 			Date birthday = model.getBirthday();
@@ -270,6 +280,30 @@ public class PreferencesWindow extends AbstractWindow {
 			String bio = model.getNote();
 			if (bio != null && bio.length() > 0)
 				addHTMLLabelRow(general, "Bio", bio);
+		}
+		
+		if (model.hasField(EmailField.NAME)) {
+			String email = model.getEmail();
+			if (email != null && email.length() > 0)
+				addHTMLLabelRow(general, "Email", email);
+		}
+		
+		if (model.hasField(TelField.NAME)) {
+			String tel = model.getTel();
+			if (tel != null && tel.length() > 0)
+				addHTMLLabelRow(general, "Telephone", tel);
+		}
+		
+		if (model.hasField(URLField.NAME)) {
+			String url = model.getUrl();
+			if (url != null && url.length() > 0)
+				addHTMLLabelRow(general, "Website", url);
+		}
+		
+		if (model.hasField(TimeZoneField.NAME)) {
+			String timezone = model.getTimeZone();
+			if (timezone != null && timezone.length() > 0)
+				addHTMLLabelRow(general, "Timezone", timezone);
 		}
 	}
 
@@ -294,20 +328,35 @@ public class PreferencesWindow extends AbstractWindow {
 		generalEdit.addStyleName("edit");
 
 		final StyledTextBox avatarF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Avatar url", avatarF, "Everyone");
+		addWidgetRow(generalEdit, "Avatar url", avatarF);
 
 		final StyledTextBox displaynameF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Displayname", displaynameF, "Everyone");
+		addWidgetRow(generalEdit, "Displayname", displaynameF);
+
+		final StyledTextBox nameF = new StyledTextBox("", "", "250px");
+		addWidgetRow(generalEdit, "Name", nameF);
 
 		final StyledTextBox birthdayF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Birthday", birthdayF, "Friends");
+		addWidgetRow(generalEdit, "Birthday", birthdayF);
 
 		final StyledTextBox genderF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Gender", genderF, "Only you");
+		addWidgetRow(generalEdit, "Gender", genderF);
 
 		final StyledTextBox bioF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Bio", bioF, "Everyone");
+		addWidgetRow(generalEdit, "Bio", bioF);
+		
+		final StyledTextBox emailF = new StyledTextBox("", "", "250px");
+		addWidgetRow(generalEdit, "Email", emailF);
 
+		final StyledTextBox telF = new StyledTextBox("", "", "250px");
+		addWidgetRow(generalEdit, "Telephone", telF);
+		
+		final StyledTextBox urlF = new StyledTextBox("", "", "250px");
+		addWidgetRow(generalEdit, "Website", urlF);
+
+		final StyledTextBox timezoneF = new StyledTextBox("", "", "250px");
+		addWidgetRow(generalEdit, "Timezone", timezoneF);
+		
 		// Text only version of general information
 		general = new FlexTable();
 		sectionGeneral.add(general);
@@ -327,20 +376,26 @@ public class PreferencesWindow extends AbstractWindow {
 				if (displayname != null && displayname.length() > 0)
 					addHTMLLabelRow(general, "Display name", displayname);
 			}
+			
+			if (model.hasField(NameField.NAME)) {
+				String name = model.getName();
+				displaynameF.setText(name);
+				if (name != null && name.length() > 0)
+					addHTMLLabelRow(general, "Name", name);
+			}
+			
+			if (model.hasField(BirthdayField.NAME)) {
+				Date birthday = model.getBirthday();
+				birthdayF.setText(birthday.toString());
+				if (birthday != null ) addHTMLLabelRow(general, "Birthday", birthday.toString());
+			}
 
-			// if (model.hasField(BirthdayField.NAME)) {
-			// Date birthday = model.getBirthday();
-			// birthdayF.setText(birthday.toString());
-			// if (birthday != null) addHTMLLabelRow(general, "Birthday",
-			// birthday);
-			// }
-
-			// if (model.hasField("gender")) {
-			// GenderField.Type gender = model.getGender();
-			// genderF.setText(gender);
-			// if (gender != null && gender.length() > 0)
-			// addHTMLLabelRow(general, "Gender", gender);
-			// }
+			if (model.hasField(GenderField.NAME)) {
+				GenderField.Type gender = model.getGender();
+				genderF.setText(gender.toString());
+				if (gender != null)
+					addHTMLLabelRow(general, "Gender", gender.toString());
+			}
 
 			if (model.hasField(NoteField.NAME)) {
 				String bio = model.getNote();
@@ -348,6 +403,34 @@ public class PreferencesWindow extends AbstractWindow {
 				if (bio != null && bio.length() > 0)
 					addHTMLLabelRow(general, "Bio", model.getField("note")
 							.getValue());
+			}
+			
+			if (model.hasField(EmailField.NAME)) {
+				String email = model.getEmail();
+				emailF.setText(email);
+				if (email != null && email.length() > 0)
+					addHTMLLabelRow(general, "Email", email);
+			}
+			
+			if (model.hasField(TelField.NAME)) {
+				String tel = model.getTel();
+				telF.setText(tel);
+				if (tel != null && tel.length() > 0)
+					addHTMLLabelRow(general, "Telephone", tel);
+			}
+			
+			if (model.hasField(URLField.NAME)) {
+				String url = model.getUrl();
+				urlF.setText(url);
+				if (url != null && url.length() > 0)
+					addHTMLLabelRow(general, "Website", url);
+			}
+			
+			if (model.hasField(TimeZoneField.NAME)) {
+				String timezone = model.getTimeZone();
+				timezoneF.setText(timezone);
+				if (timezone != null && timezone.length() > 0)
+					addHTMLLabelRow(general, "Timezone", timezone);
 			}
 		}
 
@@ -357,7 +440,7 @@ public class PreferencesWindow extends AbstractWindow {
 		confirmG.add(buttonSaveG);
 		confirmG.add(buttonCancelG);
 
-		addWidgetRow(generalEdit, "", confirmG, "");
+		addWidgetRow(generalEdit, "", confirmG);
 
 		// handlers
 		buttonEditG.addClickHandler(new ClickHandler() {
@@ -396,15 +479,30 @@ public class PreferencesWindow extends AbstractWindow {
 						profile.addField(profileFactory.photo(avatarF.getText()));
 					if (displaynameF.getText().length() > 0)
 						profile.addField(profileFactory.fullname(displaynameF.getText()));
-					// if (birthdayF.getText().length() > 0)
-					// profile.addField(profileFactory.birthday(birthdayF.getText()));
-					// if (genderF.getText().length() > 0)
-					// profile.addField(profileFactory.gender(genderF.getText());
+					if (nameF.getText().length() > 0)
+						profile.addField(profileFactory.name(null, null, nameF.getText(), null));
+					//if (birthdayF.getText().length() > 0)
+					//	profile.addField(profileFactory.birthday(birthdayF.getText()));
+					if (genderF.getText().length() > 0) {
+						if (genderF.getText().equals("Unknown")) 
+							profile.addField(profileFactory.gender(GenderField.Type.NOTKNOWN));
+						if (genderF.getText().equals("Female")) 
+							profile.addField(profileFactory.gender(GenderField.Type.FEMALE));
+						if (genderF.getText().equals("Male")) 
+							profile.addField(profileFactory.gender(GenderField.Type.MALE));
+						if (genderF.getText().equals("N/A")) 
+							profile.addField(profileFactory.gender(GenderField.Type.NOTAPPLICABLE));
+					}
 					if (bioF.getText().length() > 0)
 						profile.addField(profileFactory.note(bioF.getText()));
-					// if (utcOffsetF.getText().length() > 0)
-					// profile.addField(profileFactory.singularField("utcOffset",
-					// utcOffsetF.getText()));
+					if (emailF.getText().length() > 0)
+						profile.addField(profileFactory.email(emailF.getText()));
+					if (telF.getText().length() > 0)
+						profile.addField(profileFactory.tel(telF.getText()));
+					if (urlF.getText().length() > 0)
+						profile.addField(profileFactory.url(urlF.getText()));
+					//if (timezoneF.getText().length() > 0)
+					//	profile.addField(profileFactory.timeZone(timeZoneF.getText()));
 				} catch (CardinalityException e) {
 
 				} catch (UnsupportedFieldException e) {

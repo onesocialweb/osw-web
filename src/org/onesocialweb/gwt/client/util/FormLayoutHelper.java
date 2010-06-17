@@ -43,7 +43,7 @@ public class FormLayoutHelper {
 	}
 
 	public static void addWidgetRow(FlexTable target, String label,
-			Widget widget, String visibility) {
+			Widget widget) {
 
 		target.insertRow(target.getRowCount());
 		target.addCell(target.getRowCount() - 1);
@@ -51,16 +51,6 @@ public class FormLayoutHelper {
 		target.addCell(target.getRowCount() - 1);
 		target.setText(target.getRowCount() - 1, 0, label);
 		target.setWidget(target.getRowCount() - 1, 1, widget);
-
-		// if relevant show the visibility settings for this field
-		if (visibility != null && visibility.length() > 0) {
-			// TooltipPushButton btnVisibility = new TooltipPushButton(new
-			// Image(OswClient.getInstance().getPreference("theme_folder") +
-			// "assets/i-visibility.png"), "Visible to: " + visibility);
-			// Button btnVisibility = new Button("Friends");
-			// PrivacySelector selector = new PrivacySelector(label);
-			// target.setWidget(target.getRowCount() - 1, 2, selector);
-		}
 
 		target.addStyleName("fields");
 
