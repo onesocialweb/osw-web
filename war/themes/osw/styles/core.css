@@ -686,7 +686,7 @@ img.logo {
 	padding: 0 25px 5px 25px;
 	}
 
-.attachmentPanel .contents .thumbnailwrapper {
+.thumbnailwrapper {
 	width: 80px;
 	height: 80px;
 	overflow: hidden;
@@ -696,19 +696,24 @@ img.logo {
 	padding: 5px;
 	}
 
-.attachmentPanel .contents .thumbnailwrapper td {
+.thumbnailwrapper table {
+	padding: 0;
+	margin: 0;
+	}
+
+.thumbnailwrapper td {
 	vertical-align: middle !important;
 	width: 60px;
-	height: 80px;
-	padding: 0;
+	height: 80p;
+	padding: 0 !important;
 	}
 	
-.attachmentPanel .contents .thumbnail {
+.thumbnailwrapper .thumbnail {
 	position: relative;
 	vertical-align: middle;
 	}
 	
-.attachmentPanel .contents .actions {
+.attachmentPanel .contents .actions, .thumbnailwrapper .actions {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -717,11 +722,11 @@ img.logo {
 	padding: 5px;
 	}
 
-.attachmentPanel .contents .actions:hover {
+.attachmentPanel .contents .actions:hover, .thumbnailwrapper .actions:hover {
 	background: rgba(255, 255, 255, 0.3);
 	}
 
-.attachmentPanel .contents .image {
+.thumbnailwrapper .image {
 	}
 
 .attachmentPanel .actions .titelbar div {

@@ -192,7 +192,7 @@ public class NewActivityPanel extends Composite {
 		statusPanel.add(flow);
 
 		// AttachmentsPanel
-		pictureAttachmentPanel = new PictureAttachmentPanel();
+		pictureAttachmentPanel = new MultiplePictureAttachmentPanel();
 		pictureAttachmentPanel.setModel(pictureAttachments);
 		pictureAttachmentPanel.addComponentListener(componentListener);
 		attachmentsPanel.add(pictureAttachmentPanel);
@@ -244,7 +244,7 @@ public class NewActivityPanel extends Composite {
 		});
 	}
 
-	private PictureAttachmentPanel pictureAttachmentPanel;
+	private MultiplePictureAttachmentPanel pictureAttachmentPanel;
 	private PrivacyAttachmentPanel privacyAttachmentPanel;
 	private ShoutAttachmentPanel shoutAttachmentPanel;
 	private PictureChooserDialog pictureChooserDialog;

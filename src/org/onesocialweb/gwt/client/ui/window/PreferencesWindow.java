@@ -25,6 +25,10 @@ import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.ui.widget.AvatarUploadField;
+import org.onesocialweb.gwt.client.ui.widget.DateField;
+import org.onesocialweb.gwt.client.ui.widget.GenderEditField;
+import org.onesocialweb.gwt.client.ui.widget.NameEditField;
 import org.onesocialweb.gwt.client.ui.widget.PrivacySelector;
 import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
 import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
@@ -33,6 +37,8 @@ import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.model.vcard4.BirthdayField;
+import org.onesocialweb.model.vcard4.DefaultGenderField;
+import org.onesocialweb.model.vcard4.DefaultNameField;
 import org.onesocialweb.model.vcard4.EmailField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
@@ -41,7 +47,6 @@ import org.onesocialweb.model.vcard4.NoteField;
 import org.onesocialweb.model.vcard4.PhotoField;
 import org.onesocialweb.model.vcard4.Profile;
 import org.onesocialweb.model.vcard4.TelField;
-import org.onesocialweb.model.vcard4.TimeZoneField;
 import org.onesocialweb.model.vcard4.URLField;
 import org.onesocialweb.model.vcard4.VCard4Factory;
 import org.onesocialweb.model.vcard4.exception.CardinalityException;
@@ -51,12 +56,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.reveregroup.gwt.imagepreloader.FitImage;
 
 public class PreferencesWindow extends AbstractWindow {
 
@@ -78,6 +85,9 @@ public class PreferencesWindow extends AbstractWindow {
 	private TooltipPushButton buttonEditG;
 	private StyledLabel instructionG;
 
+	final GenderEditField genderF = new GenderEditField();
+	final FitImage avatarD = new FitImage();
+	
 	@Override
 	protected void onInit() {
 
@@ -248,8 +258,9 @@ public class PreferencesWindow extends AbstractWindow {
 
 		if (model.hasField(PhotoField.NAME)) {
 			String avatar = model.getPhotoUri();
+			avatarD.setUrl(avatar);
 			if (avatar != null && avatar.length() > 0)
-				addHTMLLabelRow(general, "Avatar url", avatar);
+				addWidgetRow(general, "Avatar", avatarD);
 		}
 
 		if (model.hasField(FullNameField.NAME)) {
@@ -266,14 +277,21 @@ public class PreferencesWindow extends AbstractWindow {
 
 		if (model.hasField(BirthdayField.NAME)) {
 			Date birthday = model.getBirthday();
+			DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
+			String bday = dtf.format(birthday);
 			if (birthday != null)
-				addHTMLLabelRow(general, "Birthday", birthday.toString());
+				addHTMLLabelRow(general, "Birthday", bday);
 		}
 
 		if (model.hasField(GenderField.NAME)) {
+			
 			GenderField.Type gender = model.getGender();
+			
+			// in this case the GenderEditField will provide the display value, not the model
+			// because of internationalization
 			if (gender != null)
-				addHTMLLabelRow(general, "Gender", gender.toString());
+				addHTMLLabelRow(general, "Gender", genderF.getGenderText());
+			
 		}
 
 		if (model.hasField(NoteField.NAME)) {
@@ -300,11 +318,6 @@ public class PreferencesWindow extends AbstractWindow {
 				addHTMLLabelRow(general, "Website", url);
 		}
 		
-		if (model.hasField(TimeZoneField.NAME)) {
-			String timezone = model.getTimeZone();
-			if (timezone != null && timezone.length() > 0)
-				addHTMLLabelRow(general, "Timezone", timezone);
-		}
 	}
 
 	private void composeProfile() {
@@ -326,20 +339,21 @@ public class PreferencesWindow extends AbstractWindow {
 		// Editor version of general information
 		generalEdit = new FlexTable();
 		generalEdit.addStyleName("edit");
-
-		final StyledTextBox avatarF = new StyledTextBox("", "", "250px");
+		
+		final AvatarUploadField avatarF = new AvatarUploadField();
 		addWidgetRow(generalEdit, "Avatar url", avatarF);
-
+		
+		avatarD.setMaxSize(80, 80);
+		
 		final StyledTextBox displaynameF = new StyledTextBox("", "", "250px");
 		addWidgetRow(generalEdit, "Displayname", displaynameF);
 
-		final StyledTextBox nameF = new StyledTextBox("", "", "250px");
+		final NameEditField nameF = new NameEditField();
 		addWidgetRow(generalEdit, "Name", nameF);
 
-		final StyledTextBox birthdayF = new StyledTextBox("", "", "250px");
+		final DateField birthdayF = new DateField();
 		addWidgetRow(generalEdit, "Birthday", birthdayF);
 
-		final StyledTextBox genderF = new StyledTextBox("", "", "250px");
 		addWidgetRow(generalEdit, "Gender", genderF);
 
 		final StyledTextBox bioF = new StyledTextBox("", "", "250px");
@@ -354,9 +368,6 @@ public class PreferencesWindow extends AbstractWindow {
 		final StyledTextBox urlF = new StyledTextBox("", "", "250px");
 		addWidgetRow(generalEdit, "Website", urlF);
 
-		final StyledTextBox timezoneF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Timezone", timezoneF);
-		
 		// Text only version of general information
 		general = new FlexTable();
 		sectionGeneral.add(general);
@@ -365,9 +376,12 @@ public class PreferencesWindow extends AbstractWindow {
 		if (model != null) {
 			if (model.hasField(PhotoField.NAME)) {
 				String avatar = model.getPhotoUri();
-				avatarF.setText(avatar);
+				// the field
+				avatarF.setAvatar(avatar);
+				// for display
+				avatarD.setUrl(avatar);
 				if (avatar != null && avatar.length() > 0)
-					addHTMLLabelRow(general, "Avatar url", avatar);
+					addWidgetRow(general, "Avatar", avatarD);
 			}
 
 			if (model.hasField(FullNameField.NAME)) {
@@ -378,23 +392,36 @@ public class PreferencesWindow extends AbstractWindow {
 			}
 			
 			if (model.hasField(NameField.NAME)) {
+				// the full string
 				String name = model.getName();
-				displaynameF.setText(name);
+				
+				// get the separate pieces for editing
+				DefaultNameField nameField = new DefaultNameField();
+				nameField = (DefaultNameField) model.getField(NameField.NAME);
+				nameF.setName(nameField.getGiven(), nameField.getSurname());
+				
 				if (name != null && name.length() > 0)
 					addHTMLLabelRow(general, "Name", name);
 			}
 			
 			if (model.hasField(BirthdayField.NAME)) {
 				Date birthday = model.getBirthday();
-				birthdayF.setText(birthday.toString());
-				if (birthday != null ) addHTMLLabelRow(general, "Birthday", birthday.toString());
+				DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
+				String bday = dtf.format(birthday);
+				birthdayF.setDate(birthday);
+				if (birthday != null ) addHTMLLabelRow(general, "Birthday", bday);
 			}
 
 			if (model.hasField(GenderField.NAME)) {
 				GenderField.Type gender = model.getGender();
-				genderF.setText(gender.toString());
+				
+				// get the gender value
+				DefaultGenderField genderField = new DefaultGenderField();
+				genderField = (DefaultGenderField) model.getField(GenderField.NAME);
+				
+				genderF.setGender(gender);
 				if (gender != null)
-					addHTMLLabelRow(general, "Gender", gender.toString());
+					addHTMLLabelRow(general, "Gender", genderF.getGenderText());
 			}
 
 			if (model.hasField(NoteField.NAME)) {
@@ -426,12 +453,6 @@ public class PreferencesWindow extends AbstractWindow {
 					addHTMLLabelRow(general, "Website", url);
 			}
 			
-			if (model.hasField(TimeZoneField.NAME)) {
-				String timezone = model.getTimeZone();
-				timezoneF.setText(timezone);
-				if (timezone != null && timezone.length() > 0)
-					addHTMLLabelRow(general, "Timezone", timezone);
-			}
 		}
 
 		StyledFlowPanel confirmG = new StyledFlowPanel("confirm");
@@ -475,23 +496,24 @@ public class PreferencesWindow extends AbstractWindow {
 
 				try {
 					// prepare for updating and check for empty values
-					if (avatarF.getText().length() > 0)
-						profile.addField(profileFactory.photo(avatarF.getText()));
+					if (avatarF.getAvatarUri().length() > 0)
+						profile.addField(profileFactory.photo(avatarF.getAvatarUri()));
 					if (displaynameF.getText().length() > 0)
 						profile.addField(profileFactory.fullname(displaynameF.getText()));
-					if (nameF.getText().length() > 0)
-						profile.addField(profileFactory.name(null, null, nameF.getText(), null));
-					//if (birthdayF.getText().length() > 0)
-					//	profile.addField(profileFactory.birthday(birthdayF.getText()));
-					if (genderF.getText().length() > 0) {
-						if (genderF.getText().equals("Unknown")) 
-							profile.addField(profileFactory.gender(GenderField.Type.NOTKNOWN));
-						if (genderF.getText().equals("Female")) 
-							profile.addField(profileFactory.gender(GenderField.Type.FEMALE));
-						if (genderF.getText().equals("Male")) 
+					if (nameF.getFirstName().length() > 0 || nameF.getLastName().length() > 0)
+						profile.addField(profileFactory.name(null, nameF.getFirstName(), nameF.getLastName(), null));
+					if (birthdayF.getDate() != null)
+						profile.addField(profileFactory.birthday(birthdayF.getDate()));
+					if (genderF.getGenderText().length() > 0) {
+						if (genderF.getGenderValue().equals(GenderField.Type.MALE.toString())) {
 							profile.addField(profileFactory.gender(GenderField.Type.MALE));
-						if (genderF.getText().equals("N/A")) 
+						} else if (genderF.getGenderValue().equals(GenderField.Type.FEMALE.toString())) {
+							profile.addField(profileFactory.gender(GenderField.Type.FEMALE));
+						} else if (genderF.getGenderValue().equals(GenderField.Type.NOTKNOWN.toString())) {
+							profile.addField(profileFactory.gender(GenderField.Type.NOTKNOWN));
+						} else if (genderF.getGenderValue().equals(GenderField.Type.NOTAPPLICABLE.toString())) {
 							profile.addField(profileFactory.gender(GenderField.Type.NOTAPPLICABLE));
+						}
 					}
 					if (bioF.getText().length() > 0)
 						profile.addField(profileFactory.note(bioF.getText()));
@@ -501,8 +523,6 @@ public class PreferencesWindow extends AbstractWindow {
 						profile.addField(profileFactory.tel(telF.getText()));
 					if (urlF.getText().length() > 0)
 						profile.addField(profileFactory.url(urlF.getText()));
-					//if (timezoneF.getText().length() > 0)
-					//	profile.addField(profileFactory.timeZone(timeZoneF.getText()));
 				} catch (CardinalityException e) {
 
 				} catch (UnsupportedFieldException e) {
@@ -514,12 +534,11 @@ public class PreferencesWindow extends AbstractWindow {
 
 							@Override
 							public void onFailure() {
-								// TODO Auto-generated method stub
+								
 							}
 
 							@Override
 							public void onSuccess(Object result) {
-								// TODO Auto-generated method stub
 								model = profile;
 								refreshProfile();
 							}

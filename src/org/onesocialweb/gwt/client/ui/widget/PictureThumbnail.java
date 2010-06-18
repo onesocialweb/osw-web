@@ -83,5 +83,9 @@ public class PictureThumbnail extends Composite {
 	public void removeOnClose() {
 		this.clickHandler = null;
 	}
+	
+	public void setPicture(String url) {
+		image.setUrl(url);
+	}
 
 }

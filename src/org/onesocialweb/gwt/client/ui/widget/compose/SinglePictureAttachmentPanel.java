@@ -23,9 +23,9 @@ import org.onesocialweb.model.activity.ActivityObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
-public class PictureAttachmentPanel extends AbstractAttachmentPanel {
+public class SinglePictureAttachmentPanel extends AbstractAttachmentPanel {
 
-	public PictureAttachmentPanel() {
+	public SinglePictureAttachmentPanel() {
 		setVisible(false);
 		setHeader("Pictures");
 		setIcon(OswClient.getInstance().getPreference("theme_folder")
