@@ -18,6 +18,7 @@ package org.onesocialweb.gwt.client.ui.widget.activity;
 
 import java.util.List;
 
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
@@ -27,16 +28,23 @@ import org.onesocialweb.gwt.service.StreamEvent;
 import org.onesocialweb.gwt.service.StreamEvent.Type;
 import org.onesocialweb.gwt.util.Observer;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public abstract class AbstractActivityPanel<T> extends FlowPanel {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private Stream<T> model;
 
 	private DefaultTaskInfo task;
 
 	private boolean update = true;
+	
+	private StyledLabel msg = new StyledLabel("message",
+			uiText.NoActivitiesAvailable());
 
 	public void setModel(Stream<T> model) {
 		this.model = model;
@@ -59,6 +67,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 	protected abstract Widget render(T item);
 
 	protected void repaint() {
+		
 		clear();
 		List<T> items = model.getItems();
 
@@ -71,8 +80,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 				}
 			} else {
 				// if there are no results
-				StyledLabel msg = new StyledLabel("message",
-						"There are no status updates available.");
+				
 				add(msg);
 			}
 
@@ -82,23 +90,17 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
 		} else {
 			if (task == null) {
-				task = new DefaultTaskInfo("Fetching the activities", false);
+				task = new DefaultTaskInfo(uiText.FetchingActivities(), false);
 				TaskMonitor.getInstance().addTask(task);
 			}
 		}
 	}
 
 	private void showItem(T item) {
+		remove(msg);
 		Widget w = render(item);
 		if (w != null) {
 			insert(render(item), 0);
-		}
-	}
-
-	private void removeItem(T item) {
-		Widget w = render(item);
-		if (w != null) {
-			remove(render(item));
 		}
 	}
 
@@ -111,10 +113,6 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 					for (T item : event.getItems()) {
 						showItem(item);
 					}
-				//} else if (event.getType().equals(Type.removed)) {
-				//	for (T item : event.getItems()) {
-				//		removeItem(item);
-				//	}
 				} else {
 					repaint();
 				}

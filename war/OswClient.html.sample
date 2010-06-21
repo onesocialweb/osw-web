@@ -47,7 +47,14 @@
 		  	file_retrieval_endpoint: "http://osw.example.com/file",
 
 		  	// If true, we may do a bit more of logging
-			developer_mode: "true"
+			developer_mode: "true",
+			
+			
+			// If true, allows registration on this server
+			registration_allowed: "true",
+
+			// If true, allows registration on this server only via a registration code
+			registration_code: "true"
 		};
 	</script>
 

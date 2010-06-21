@@ -20,9 +20,11 @@ import java.util.Date;
 
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.PictureHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.client.ui.dialog.PictureChooserDialog;
 import org.onesocialweb.gwt.client.ui.event.ComponentEvent;
 import org.onesocialweb.gwt.client.ui.event.ComponentHelper;
@@ -39,6 +41,7 @@ import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.activity.ActivityVerb;
 import org.onesocialweb.model.atom.AtomFactory;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -49,9 +52,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 
 public class NewActivityPanel extends Composite {
-
-	public static final String EVERYONE = "Everyone";
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private final ListModel<ActivityObject> pictureAttachments = new ListModel<ActivityObject>();
 
 	private final ComponentHelper componentHelper = new ComponentHelper();
@@ -66,7 +70,7 @@ public class NewActivityPanel extends Composite {
 		// Empty the text area
 		textareaUpdate.setText("");
 
-		// Tell the listener to ignore events, we´ll fire a single event when we
+		// Tell the listener to ignore events, we'll fire a single event when we
 		// are done
 		componentListener.setIgnoreEvent(true);
 
@@ -94,6 +98,15 @@ public class NewActivityPanel extends Composite {
 	}
 
 	private void postStatusUpdate() {
+		
+		if (textareaUpdate.getText().length() == 0) {
+			AlertDialog
+			.getInstance()
+			.showDialog(
+					uiText.EmptyUpdate(),
+					uiText.Oops());
+			return;
+		}
 		// TODO disable the update panel during the update
 		final OswService service = OswServiceFactory.getService();
 		final AtomFactory atomFactory = service.getAtomFactory();
@@ -132,7 +145,7 @@ public class NewActivityPanel extends Composite {
 		// check privacy settings
 		String visibilityValue = privacyAttachmentPanel.getPrivacyValue();
 
-		if (visibilityValue.equals(EVERYONE)) {
+		if (visibilityValue.equals(uiText.Everyone())) {
 			rule.addSubject(service.getAclFactory().aclSubject(null,
 					AclSubject.EVERYONE));
 		} else {
@@ -146,18 +159,18 @@ public class NewActivityPanel extends Composite {
 
 		// Prepare a task to monitor status
 		final DefaultTaskInfo task = new DefaultTaskInfo(
-				"Updating your status", false);
+				uiText.UpdatingStatus(), false);
 		TaskMonitor.getInstance().addTask(task);
 		service.post(entry, new RequestCallback<ActivityEntry>() {
 
 			@Override
 			public void onFailure() {
-				task.complete("Failed to update your status", Status.failure);
+				task.complete(uiText.UpdateFailure(), Status.failure);
 			}
 
 			@Override
 			public void onSuccess(ActivityEntry result) {
-				task.complete("Your status has been posted", Status.succes);
+				task.complete(uiText.UpdateSuccess(), Status.succes);
 			}
 
 		});
@@ -213,9 +226,9 @@ public class NewActivityPanel extends Composite {
 		statusPanel.setStyleName("topPanel");
 
 		// Set tooltips
-		addPhoto.setTitle("Add picture");
-		addPrivacy.setTitle("Change privacy (default: Everyone)");
-		addRecipients.setTitle("Shout publicly to specific people");
+		addPhoto.setTitle(uiText.AddPicture());
+		addPrivacy.setTitle(uiText.ChangePrivacy());
+		addRecipients.setTitle(uiText.ShoutToContacts());
 
 		initWidget(statusPanel);
 
@@ -252,8 +265,8 @@ public class NewActivityPanel extends Composite {
 	private final FlowPanel statusPanel = new FlowPanel();
 	private final FlowPanel attachmentsPanel = new FlowPanel();
 	private final FlowPanel flow = new FlowPanel();
-	private final Label attachment = new Label("Add:");
-	private final Button buttonUpdate = new Button("Share");
+	private final Label attachment = new Label(uiText.Add());
+	private final Button buttonUpdate = new Button(uiText.Share());
 	private final TextareaUpdate textareaUpdate = new TextareaUpdate();
 
 	private final PushButton addRecipients = new PushButton(new Image(OswClient
@@ -291,6 +304,7 @@ public class NewActivityPanel extends Composite {
 		@Override
 		public void componentResized(ComponentEvent e) {
 			if (!ignoreEvent) {
+				System.out.println("component resized!");
 				componentHelper.fireComponentResized(e);
 			}
 		}

@@ -17,19 +17,24 @@
 package org.onesocialweb.gwt.client.ui.window;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.event.ComponentEvent;
 import org.onesocialweb.gwt.client.ui.event.ComponentListener;
 import org.onesocialweb.gwt.client.ui.widget.activity.InboxPanel;
 import org.onesocialweb.gwt.client.ui.widget.compose.NewActivityPanel;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ToggleButton;
 
 public class FeedWindow extends AbstractWindow {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private final ToggleButton toggleStatusPanel = new ToggleButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
 					+ "assets/08-chat.png"));
@@ -61,16 +66,17 @@ public class FeedWindow extends AbstractWindow {
 
 		// Setup window elements
 		setStyle("feedWindow");
-		setWindowTitle("What's up");
+		setWindowTitle(uiText.Activities());
 
 		// Prepare the panels
 		statusPanelListener = new StatusPanelListener();
 		statusPanel = new NewActivityPanel();
+		
 		statusPanel.setVisible(true);
 		statusPanel.addComponentListener(statusPanelListener);
 
 		toggleStatusPanel.setDown(true);
-		toggleStatusPanel.setTitle("Hide status update panel");
+		toggleStatusPanel.setTitle(uiText.HideUpdatePanel());
 		toggleStatusPanel.addStyleDependentName("toggleShowUpdate");
 		toggleStatusPanel.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -85,15 +91,32 @@ public class FeedWindow extends AbstractWindow {
 		getTopbar().add(statusPanel);
 		getContents().add(inboxPanel);
 		getActions().add(toggleStatusPanel);
+		
+		statusPanel.addComponentListener(new ComponentListener() {
+			
+			@Override
+			public void componentShown(ComponentEvent e) {}
+			
+			@Override
+			public void componentResized(ComponentEvent e) {
+				updateLayout();
+			}
+			
+			@Override
+			public void componentMoved(ComponentEvent e) {}
+			
+			@Override
+			public void componentHidden(ComponentEvent e) {}
+		});
 	}
 
 	private void toggleStatusPanel() {
 		if (statusPanel.isVisible()) {
 			statusPanel.setVisible(false);
-			toggleStatusPanel.setTitle("Show status update panel");
+			toggleStatusPanel.setTitle(uiText.ShowUpdatePanel());
 		} else {
 			statusPanel.setVisible(true);
-			toggleStatusPanel.setTitle("Hide status update panel");
+			toggleStatusPanel.setTitle(uiText.HideUpdatePanel());
 		}
 
 		// Force layout update on the Feed window itself

@@ -17,20 +17,25 @@
 package org.onesocialweb.gwt.client.ui.widget.compose;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.PictureThumbnail;
 import org.onesocialweb.model.activity.ActivityObject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 
 public class MultiplePictureAttachmentPanel extends AbstractAttachmentPanel {
 
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	public MultiplePictureAttachmentPanel() {
 		setVisible(false);
-		setHeader("Pictures");
+		setHeader(uiText.Pictures());
 		setIcon(OswClient.getInstance().getPreference("theme_folder")
 				+ "assets/i-camera2.png");
-		setCloseTooltip("Remove all pictures");
+		setCloseTooltip(uiText.RemovePictures());
 	}
 
 	@Override

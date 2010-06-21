@@ -20,8 +20,10 @@ import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addHTMLLabelRow;
 import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addWidgetRow;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
@@ -34,6 +36,7 @@ import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
 import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
 import org.onesocialweb.gwt.client.ui.widget.StyledTextBox;
 import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
+import org.onesocialweb.gwt.client.util.OSWUrlBuilder;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.model.vcard4.BirthdayField;
@@ -52,21 +55,30 @@ import org.onesocialweb.model.vcard4.VCard4Factory;
 import org.onesocialweb.model.vcard4.exception.CardinalityException;
 import org.onesocialweb.model.vcard4.exception.UnsupportedFieldException;
 
+import com.google.code.gwt.storage.client.Storage;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.reveregroup.gwt.imagepreloader.FitImage;
 
 public class PreferencesWindow extends AbstractWindow {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private String jid;
 	private Profile model;
 
@@ -92,7 +104,7 @@ public class PreferencesWindow extends AbstractWindow {
 	protected void onInit() {
 
 		setStyle("preferencesWindow");
-		setWindowTitle("Preferences");
+		setWindowTitle(uiText.Preferences());
 
 		// TODO get data
 
@@ -103,8 +115,8 @@ public class PreferencesWindow extends AbstractWindow {
 	private void composeWindow() {
 
 		// add components
-		tabpanel.add(account, "Account");
-		tabpanel.add(profile, "Profile & Contact");
+		tabpanel.add(account, uiText.Account());
+		tabpanel.add(profile, uiText.ProfileAndContact());
 		// tabpanel.add(privacy, "Privacy");
 		tabpanel.selectTab(0);
 
@@ -229,7 +241,7 @@ public class PreferencesWindow extends AbstractWindow {
 
 		// Fetch the new profile
 		final DefaultTaskInfo task = new DefaultTaskInfo(
-				"Fetching the profile", false);
+				uiText.FetchingProfile(), false);
 		TaskMonitor.getInstance().addTask(task);
 
 		OswServiceFactory.getService().getProfile(jid,
@@ -260,27 +272,28 @@ public class PreferencesWindow extends AbstractWindow {
 			String avatar = model.getPhotoUri();
 			avatarD.setUrl(avatar);
 			if (avatar != null && avatar.length() > 0)
-				addWidgetRow(general, "Avatar", avatarD);
+				addWidgetRow(general, uiText.Avatar(), avatarD);
 		}
 
 		if (model.hasField(FullNameField.NAME)) {
 			String displayname = model.getFullName();
 			if (displayname != null && displayname.length() > 0)
-				addHTMLLabelRow(general, "Display name", displayname);
+				addHTMLLabelRow(general, uiText.DisplayName(), displayname);
 		}
 		
 		if (model.hasField(NameField.NAME)) {
 			String name = model.getName();
 			if (name != null && name.length() > 0)
-				addHTMLLabelRow(general, "Name", name);
+				addHTMLLabelRow(general, uiText.FullName(), name);
 		}
 
 		if (model.hasField(BirthdayField.NAME)) {
 			Date birthday = model.getBirthday();
-			DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
-			String bday = dtf.format(birthday);
-			if (birthday != null)
-				addHTMLLabelRow(general, "Birthday", bday);
+			if (birthday != null) {
+				DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
+				String bday = dtf.format(birthday);
+				addHTMLLabelRow(general, uiText.Birthday(), bday);
+			}	
 		}
 
 		if (model.hasField(GenderField.NAME)) {
@@ -290,32 +303,32 @@ public class PreferencesWindow extends AbstractWindow {
 			// in this case the GenderEditField will provide the display value, not the model
 			// because of internationalization
 			if (gender != null)
-				addHTMLLabelRow(general, "Gender", genderF.getGenderText());
+				addHTMLLabelRow(general, uiText.Gender(), genderF.getGenderText());
 			
 		}
 
 		if (model.hasField(NoteField.NAME)) {
 			String bio = model.getNote();
 			if (bio != null && bio.length() > 0)
-				addHTMLLabelRow(general, "Bio", bio);
+				addHTMLLabelRow(general, uiText.Bio(), bio);
 		}
 		
 		if (model.hasField(EmailField.NAME)) {
 			String email = model.getEmail();
 			if (email != null && email.length() > 0)
-				addHTMLLabelRow(general, "Email", email);
+				addHTMLLabelRow(general, uiText.Email(), email);
 		}
 		
 		if (model.hasField(TelField.NAME)) {
 			String tel = model.getTel();
 			if (tel != null && tel.length() > 0)
-				addHTMLLabelRow(general, "Telephone", tel);
+				addHTMLLabelRow(general, uiText.Telephone(), tel);
 		}
 		
 		if (model.hasField(URLField.NAME)) {
 			String url = model.getUrl();
 			if (url != null && url.length() > 0)
-				addHTMLLabelRow(general, "Website", url);
+				addHTMLLabelRow(general, uiText.Website(), url);
 		}
 		
 	}
@@ -326,14 +339,11 @@ public class PreferencesWindow extends AbstractWindow {
 		sectionGeneral = new StyledFlowPanel("section");
 		buttonEditG = new TooltipPushButton(new Image(OswClient.getInstance()
 				.getPreference("theme_folder")
-				+ "assets/i-edit.png"), "Edit profile fields and visibility");
+				+ "assets/i-edit.png"), uiText.EditProfile());
 		buttonEditG.addStyleName("sectionedit");
-		StyledLabel titleG = new StyledLabel("grouplabel", "General");
-		instructionG = new StyledLabel("instruction",
-				"This general information is visible by 'Everyone'.");
+		StyledLabel titleG = new StyledLabel("grouplabel", uiText.General());
 		sectionGeneral.add(buttonEditG);
 		sectionGeneral.add(titleG);
-		// sectionGeneral.add(instructionG);
 		this.profile.add(sectionGeneral);
 
 		// Editor version of general information
@@ -341,37 +351,37 @@ public class PreferencesWindow extends AbstractWindow {
 		generalEdit.addStyleName("edit");
 		
 		final AvatarUploadField avatarF = new AvatarUploadField();
-		addWidgetRow(generalEdit, "Avatar url", avatarF);
+		addWidgetRow(generalEdit, uiText.Avatar(), avatarF);
 		
 		avatarD.setMaxSize(80, 80);
 		
 		final StyledTextBox displaynameF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Displayname", displaynameF);
+		addWidgetRow(generalEdit, uiText.DisplayName(), displaynameF);
 
 		final NameEditField nameF = new NameEditField();
-		addWidgetRow(generalEdit, "Name", nameF);
+		addWidgetRow(generalEdit, uiText.FullName(), nameF);
 
 		final DateField birthdayF = new DateField();
-		addWidgetRow(generalEdit, "Birthday", birthdayF);
+		addWidgetRow(generalEdit, uiText.Birthday(), birthdayF);
 
-		addWidgetRow(generalEdit, "Gender", genderF);
+		addWidgetRow(generalEdit, uiText.Gender(), genderF);
 
 		final StyledTextBox bioF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Bio", bioF);
+		addWidgetRow(generalEdit, uiText.Bio(), bioF);
 		
 		final StyledTextBox emailF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Email", emailF);
+		addWidgetRow(generalEdit, uiText.Email(), emailF);
 
 		final StyledTextBox telF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Telephone", telF);
+		addWidgetRow(generalEdit, uiText.Telephone(), telF);
 		
 		final StyledTextBox urlF = new StyledTextBox("", "", "250px");
-		addWidgetRow(generalEdit, "Website", urlF);
+		addWidgetRow(generalEdit, uiText.Website(), urlF);
 
 		// Text only version of general information
 		general = new FlexTable();
 		sectionGeneral.add(general);
-
+		
 		// make sure the model is not empty when there is no profile available
 		if (model != null) {
 			if (model.hasField(PhotoField.NAME)) {
@@ -381,14 +391,14 @@ public class PreferencesWindow extends AbstractWindow {
 				// for display
 				avatarD.setUrl(avatar);
 				if (avatar != null && avatar.length() > 0)
-					addWidgetRow(general, "Avatar", avatarD);
+					addWidgetRow(general, uiText.Avatar(), avatarD);
 			}
 
 			if (model.hasField(FullNameField.NAME)) {
 				String displayname = model.getFullName();
 				displaynameF.setText(displayname);
 				if (displayname != null && displayname.length() > 0)
-					addHTMLLabelRow(general, "Display name", displayname);
+					addHTMLLabelRow(general, uiText.DisplayName(), displayname);
 			}
 			
 			if (model.hasField(NameField.NAME)) {
@@ -401,15 +411,17 @@ public class PreferencesWindow extends AbstractWindow {
 				nameF.setName(nameField.getGiven(), nameField.getSurname());
 				
 				if (name != null && name.length() > 0)
-					addHTMLLabelRow(general, "Name", name);
+					addHTMLLabelRow(general, uiText.FullName(), name);
 			}
 			
 			if (model.hasField(BirthdayField.NAME)) {
 				Date birthday = model.getBirthday();
-				DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
-				String bday = dtf.format(birthday);
-				birthdayF.setDate(birthday);
-				if (birthday != null ) addHTMLLabelRow(general, "Birthday", bday);
+				if (birthday != null) {
+					DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
+					String bday = dtf.format(birthday);
+					birthdayF.setDate(birthday);
+					if (birthday != null ) addHTMLLabelRow(general, uiText.Birthday(), bday);
+				}	
 			}
 
 			if (model.hasField(GenderField.NAME)) {
@@ -421,14 +433,14 @@ public class PreferencesWindow extends AbstractWindow {
 				
 				genderF.setGender(gender);
 				if (gender != null)
-					addHTMLLabelRow(general, "Gender", genderF.getGenderText());
+					addHTMLLabelRow(general, uiText.Gender(), genderF.getGenderText());
 			}
 
 			if (model.hasField(NoteField.NAME)) {
 				String bio = model.getNote();
 				bioF.setText(bio);
 				if (bio != null && bio.length() > 0)
-					addHTMLLabelRow(general, "Bio", model.getField("note")
+					addHTMLLabelRow(general, uiText.Bio(), model.getField("note")
 							.getValue());
 			}
 			
@@ -436,28 +448,33 @@ public class PreferencesWindow extends AbstractWindow {
 				String email = model.getEmail();
 				emailF.setText(email);
 				if (email != null && email.length() > 0)
-					addHTMLLabelRow(general, "Email", email);
+					addHTMLLabelRow(general, uiText.Email(), email);
 			}
 			
 			if (model.hasField(TelField.NAME)) {
 				String tel = model.getTel();
 				telF.setText(tel);
 				if (tel != null && tel.length() > 0)
-					addHTMLLabelRow(general, "Telephone", tel);
+					addHTMLLabelRow(general, uiText.Telephone(), tel);
 			}
 			
 			if (model.hasField(URLField.NAME)) {
 				String url = model.getUrl();
 				urlF.setText(url);
 				if (url != null && url.length() > 0)
-					addHTMLLabelRow(general, "Website", url);
+					addHTMLLabelRow(general, uiText.Website(), url);
 			}
 			
-		}
+			// if there are no fields
+			if (model.getFields().size() == 0) {
+				showEditProfile();
+			}
+			
+		} 
 
 		StyledFlowPanel confirmG = new StyledFlowPanel("confirm");
-		Button buttonSaveG = new Button("Save");
-		Button buttonCancelG = new Button("Cancel");
+		Button buttonSaveG = new Button(uiText.Save());
+		Button buttonCancelG = new Button(uiText.Cancel());
 		confirmG.add(buttonSaveG);
 		confirmG.add(buttonCancelG);
 
@@ -467,11 +484,7 @@ public class PreferencesWindow extends AbstractWindow {
 		buttonEditG.addClickHandler(new ClickHandler() {
 
 			public void onClick(ClickEvent event) {
-				sectionGeneral.remove(general);
-				sectionGeneral.add(generalEdit);
-				buttonEditG.setVisible(false);
-				instructionG
-						.setHTML("Edit the fields below and define who can see this information.");
+				showEditProfile();
 			}
 		});
 
@@ -481,8 +494,6 @@ public class PreferencesWindow extends AbstractWindow {
 				sectionGeneral.add(general);
 				sectionGeneral.remove(generalEdit);
 				buttonEditG.setVisible(true);
-				instructionG
-						.setHTML("This general information is visible by 'Everyone'.");
 			}
 		});
 
@@ -552,23 +563,118 @@ public class PreferencesWindow extends AbstractWindow {
 			}
 		});
 	}
-
+	
+	private void showEditProfile() {
+		sectionGeneral.remove(general);
+		sectionGeneral.add(generalEdit);
+		buttonEditG.setVisible(false);
+	}
+	
 	private void loadAccount() {
 
 		// username
 		StyledFlowPanel sectionUsername = new StyledFlowPanel("section");
 		FlexTable username = new FlexTable();
-		StyledLabel titleUN = new StyledLabel("grouplabel", "Your identity");
+		StyledLabel titleUN = new StyledLabel("grouplabel", uiText.YourIdentity());
 		StyledLabel instructionUN = new StyledLabel("instruction",
-				"Please note that this identity cannot be changed.");
+				uiText.IdentityFixed());
 		sectionUsername.add(titleUN);
 		sectionUsername.add(instructionUN);
 		sectionUsername.add(username);
 		account.add(sectionUsername);
 
-		addHTMLLabelRow(username, "User name", OswServiceFactory.getService()
+		addHTMLLabelRow(username, uiText.UserName(), OswServiceFactory.getService()
 				.getUserBareJID());
 
+		// change language
+		StyledFlowPanel sectionChangeLocale = new StyledFlowPanel("section");
+		FlexTable changeLocale = new FlexTable();
+		StyledLabel titleCL = new StyledLabel("grouplabel", uiText.ChangeLocale());
+		StyledLabel instructionCL = new StyledLabel("instruction", uiText.SetLanguage());
+		
+		final ListBox languageSelector = new ListBox();
+		
+		// add the values to the list
+		HashMap<String, String> OSWLocales = OswClient.getInstance().getOSWLocales();
+		for (String locale : OSWLocales.keySet()) {
+			languageSelector.addItem(OSWLocales.get(locale).toString(), locale);
+		}
+		
+		// get the locale if stored in the browser
+		String localeStored = "";
+		if (Storage.isSupported()) {
+			Storage localStorage = Storage.getLocalStorage();
+			localeStored = localStorage.getItem("locale");
+		}
+		
+		// select the right locale in the list if one is predefined
+		if (localeStored != null) {
+			for (int i = 0; i < languageSelector.getItemCount(); i++) {
+				if ( localeStored.equals(languageSelector.getValue(i))) {
+					languageSelector.setSelectedIndex(i);
+				}
+			}
+		// otherwise provide the default
+		}  else {
+			for (int i = 0; i < languageSelector.getItemCount(); i++) {
+				if (languageSelector.getValue(i).equals("default")) {
+					languageSelector.setSelectedIndex(i);
+				}
+			}
+		}
+		
+		sectionChangeLocale.add(titleCL);
+		sectionChangeLocale.add(instructionCL);
+		sectionChangeLocale.add(changeLocale);
+		account.add(sectionChangeLocale);
+		
+		addWidgetRow(changeLocale, uiText.Language(), languageSelector);
+		
+		languageSelector.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				
+				String value = languageSelector.getValue(languageSelector.getSelectedIndex());  
+				
+				// store the new default value if possible or remove the value in case
+				// of default (English)
+				if (Storage.isSupported()) {
+					Storage localStorage = Storage.getLocalStorage();
+					
+					if (value.equals("default")) {
+						localStorage.removeItem("locale");
+					} else {
+						localStorage.setItem("locale", value);
+					}
+					
+				} 
+				
+				// construct the new url with the locale parameter
+				// and reload in the PreferencesApplication
+				if (value != null && value.length() > 0) { 
+					
+					if (value.equals("default")) {
+						OSWUrlBuilder urlBuilder = new OSWUrlBuilder();
+						urlBuilder.removeParameter("locale");
+						Window.Location.replace(urlBuilder.buildString());
+					} else {
+						OSWUrlBuilder urlBuilder = new OSWUrlBuilder();
+						urlBuilder.setParameter("locale", value); 
+						Window.Location.replace(urlBuilder.buildString()); 
+					}
+					
+				}
+
+			}
+			
+		});
+		
+		
+		
+		//Location url = new Location.createUrlBuilder().setParameter("locale", "en");
+		//Window.Location.replace();
+		
 		// change password
 		// StyledFlowPanel sectionChangePassword = new
 		// StyledFlowPanel("section");
@@ -582,8 +688,7 @@ public class PreferencesWindow extends AbstractWindow {
 		// sectionChangePassword.add(changePassword);
 		// account.add(sectionChangePassword);
 		//		
-		// addWidgetRow(changePassword, "New password", new PasswordTextBox(),
-		// "");
+		// 
 		// addWidgetRow(changePassword, "Confirm password", new
 		// PasswordTextBox(), "");
 		// addWidgetRow(changePassword, "", new Button("Save"), "");

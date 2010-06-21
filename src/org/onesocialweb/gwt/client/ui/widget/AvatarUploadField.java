@@ -18,8 +18,10 @@ package org.onesocialweb.gwt.client.ui.widget;
 
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.PictureHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.dialog.PictureChooserDialog;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,6 +30,9 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
 
 public class AvatarUploadField extends Composite {
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 	
 	private FlowPanel thumbnailContainer = new FlowPanel();
 	private StyledFlowPanel container = new StyledFlowPanel("avatarupload");
@@ -56,7 +61,7 @@ public class AvatarUploadField extends Composite {
 		setStateNoAvatar();
 		
 		// add instruction
-		addPhoto.setTitle("Add avatar");
+		addPhoto.setTitle(uiText.AddAvatar());
 		
 		pictureChooserDialog = new PictureChooserDialog(new PictureHandler() {
 			public void handlePicture(String pictureUrl) {

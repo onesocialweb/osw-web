@@ -704,7 +704,7 @@ img.logo {
 .thumbnailwrapper td {
 	vertical-align: middle !important;
 	width: 60px;
-	height: 80p;
+	height: 80px;
 	padding: 0 !important;
 	}
 	
@@ -724,9 +724,6 @@ img.logo {
 
 .attachmentPanel .contents .actions:hover, .thumbnailwrapper .actions:hover {
 	background: rgba(255, 255, 255, 0.3);
-	}
-
-.thumbnailwrapper .image {
 	}
 
 .attachmentPanel .actions .titelbar div {
@@ -1019,6 +1016,10 @@ img.logo {
 .dialog .tabcontentflowlayout .checkbox input {
 	width: inherit;
 	margin: 0 10px 0 5px !important;
+	}
+
+.dialog .upload div.gwt-Label {
+	width: 350px;
 	}
 
 .dialog .tabcontentflowlayout input.fileupload{

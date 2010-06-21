@@ -192,6 +192,7 @@ public abstract class AbstractAttachmentPanel extends FlowPanel {
 			repaint();
 			if (model.size() == 0)
 				hide();
+			
 		}
 
 		@Override

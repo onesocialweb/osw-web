@@ -62,7 +62,7 @@ label {font-size: 1.1em; height: 25px; line-height: 25px;}
 	input[type='url']:focus,
 	input[type='password']:focus,
 	textarea:focus {
-		background: #FFFBEF;
+		background: #eff8ff;
 		color: #0d0d0d;
 	}
 	

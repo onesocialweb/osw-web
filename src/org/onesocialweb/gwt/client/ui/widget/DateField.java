@@ -18,12 +18,18 @@ package org.onesocialweb.gwt.client.ui.widget;
 
 import java.util.Date;
 
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 
 public class DateField extends Composite {
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 	
 	private ListBox dayL = new ListBox();
 	private ListBox monthL = new ListBox();
@@ -52,7 +58,7 @@ public class DateField extends Composite {
 	public void setDate(Date birthday) {
 		
 		DateTimeFormat fmtDay = DateTimeFormat.getFormat("d");
-		DateTimeFormat fmtMonth = DateTimeFormat.getFormat("MMMM");
+		DateTimeFormat fmtMonth = DateTimeFormat.getFormat("M");
 		DateTimeFormat fmtYear = DateTimeFormat.getFormat("yyyy");
 		
 		String day ="";
@@ -74,7 +80,7 @@ public class DateField extends Composite {
 		}
 		
 		for (int i=0;i<monthL.getItemCount();i++) {
-			if (month.equals(monthL.getItemText(i))) {
+			if (month.equals(monthL.getValue(i))) {
 				monthL.setSelectedIndex(i);
 			}
 		}
@@ -88,12 +94,12 @@ public class DateField extends Composite {
 
 	public Date getDate() {
 		
-		DateTimeFormat dtf = DateTimeFormat.getFormat("d/MMM/yyyy");
+		DateTimeFormat dtf = DateTimeFormat.getFormat("d/M/yyyy");
 		
 		Date birthday = null;
 		
 		try {
-			birthday = dtf.parse(dayL.getItemText(dayL.getSelectedIndex()) + "/" + monthL.getItemText(monthL.getSelectedIndex()) + "/" + yearL.getItemText(yearL.getSelectedIndex()) );           
+			birthday = dtf.parse(dayL.getItemText(dayL.getSelectedIndex()) + "/" + monthL.getValue(monthL.getSelectedIndex()) + "/" + yearL.getItemText(yearL.getSelectedIndex()) );           
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -103,25 +109,31 @@ public class DateField extends Composite {
 	}
 	
 	private void initValues() {
+		
+		dayL.addItem("");
 		for (int i = 1; i < 32; i++) {
 			dayL.addItem(Integer.toString(i), Integer.toString(i));
 		}
-
-		monthL.addItem("January", "1");
-		monthL.addItem("February", "2");
-		monthL.addItem("March", "3");
-		monthL.addItem("April", "4");
-		monthL.addItem("May", "5");
-		monthL.addItem("June", "6");
-		monthL.addItem("July", "7");
-		monthL.addItem("August", "8");
-		monthL.addItem("September", "9");
-		monthL.addItem("October", "10");
-		monthL.addItem("November", "11");
-		monthL.addItem("December", "12");
-
+		
+		monthL.addItem("");		
+		monthL.addItem(uiText.January(), "1");
+		monthL.addItem(uiText.February(), "2");
+		monthL.addItem(uiText.March(), "3");
+		monthL.addItem(uiText.April(), "4");
+		monthL.addItem(uiText.May(), "5");
+		monthL.addItem(uiText.June(), "6");
+		monthL.addItem(uiText.July(), "7");
+		monthL.addItem(uiText.August(), "8");
+		monthL.addItem(uiText.September(), "9");
+		monthL.addItem(uiText.October(), "10");
+		monthL.addItem(uiText.November(), "11");
+		monthL.addItem(uiText.December(), "12");
+		
+		yearL.addItem("");
 		for (int i = 2010; i >= 1900; i--) {
 			yearL.addItem(Integer.toString(i), Integer.toString(i));
 		}
 	}
+
+
 }

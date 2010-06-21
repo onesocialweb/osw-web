@@ -19,6 +19,7 @@ package org.onesocialweb.gwt.client.ui.widget.compose;
 import java.util.Set;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
 import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
 import org.onesocialweb.gwt.service.OswServiceFactory;
@@ -27,31 +28,32 @@ import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.activity.ActivityObject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 
 public class PrivacyAttachmentPanel extends AbstractAttachmentPanel {
 
-	public static final String EVERYONE = "Everyone";
-
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private ListBox visibility;
 
 	public PrivacyAttachmentPanel() {
-		setHeader("Privacy");
+		setHeader(uiText.Privacy());
 		setVisible(false);
 		StyledFlowPanel layout = new StyledFlowPanel("privacyAttachment");
-		Label label = new Label("Who can see this update:");
+		Label label = new Label(uiText.WhoCanSeeUpdate());
 		StyledFlowPanel fix = new StyledFlowPanel("fix");
 
 		// basic settings
-		setTitle("Privacy setting");
 		setIcon(OswClient.getInstance().getPreference("theme_folder")
 				+ "assets/i-private-r.png");
-		setCloseTooltip("Back to default setting");
+		setCloseTooltip(uiText.BackToDefault());
 
 		// construct
 		visibility = new ListBox();
-		StyledLabel show = new StyledLabel("label", "With:");
+		StyledLabel show = new StyledLabel("label", uiText.With());
 		final Roster roster = OswServiceFactory.getService().getRoster();
 		roster.registerEventHandler(new Observer<RosterEvent>() {
 
@@ -80,7 +82,7 @@ public class PrivacyAttachmentPanel extends AbstractAttachmentPanel {
 
 	private void updateVisibility(ListBox visibility, Set<String> groups) {
 		visibility.clear();
-		visibility.addItem(EVERYONE);
+		visibility.addItem(uiText.Everyone());
 		for (String group : groups) {
 			visibility.addItem(group);
 		}

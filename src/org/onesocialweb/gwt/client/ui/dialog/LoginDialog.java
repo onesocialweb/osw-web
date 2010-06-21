@@ -20,6 +20,7 @@ import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.LoginHandler;
 import org.onesocialweb.gwt.client.i18n.CustomValidation;
 import org.onesocialweb.gwt.client.i18n.CustomValidationMessages;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceMessages;
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.ErrorLabel;
 import org.onesocialweb.gwt.client.ui.widget.FieldLabel;
@@ -54,9 +55,9 @@ import eu.maydu.gwt.validation.client.validators.strings.EmailValidator;
 public class LoginDialog extends AbstractDialog {
 
 	// internationalization
-	private UserInterfaceText uiText = (UserInterfaceText) GWT
-			.create(UserInterfaceText.class);
-
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	private UserInterfaceMessages uiMessages = (UserInterfaceMessages) GWT.create(UserInterfaceMessages.class);
+	
 	// private final LoginHandler loginHandler;
 	private static LoginDialog instance;
 	private TabPanel tabpanel = new TabPanel();
@@ -70,7 +71,7 @@ public class LoginDialog extends AbstractDialog {
 	private final ErrorLabel loginError = new ErrorLabel();
 	private final TextBox usernameText = new TextBox();
 	private final PasswordTextBox passwordText = new PasswordTextBox();
-	private final CheckBox rememberme = new CheckBox("Remember me");
+	private final CheckBox rememberme = new CheckBox(uiText.RememberMe());
 
 	private LoginHandler handler;
 
@@ -124,19 +125,26 @@ public class LoginDialog extends AbstractDialog {
 		FieldLabel usernameRegister = new FieldLabel(uiText.ChooseUsername());
 		FieldLabel passwordRegister = new FieldLabel(uiText.ChoosePassword());
 		FieldLabel emailRegister = new FieldLabel(uiText.EnterYourEmail());
+		FieldLabel codeRegister = new FieldLabel(uiText.EnterCode());
 		TextBox usernameTextRegister = new TextBox();
 		PasswordTextBox passwordTextRegister = new PasswordTextBox();
 		TextBox emailTextRegister = new TextBox();
+		TextBox codeTextRegister = new TextBox();
 		ErrorLabel usernameRegisterError = new ErrorLabel();
 		ErrorLabel passwordRegisterError = new ErrorLabel();
 		ErrorLabel emailRegisterError = new ErrorLabel();
+		ErrorLabel codeRegisterError = new ErrorLabel();
 
 		registerflow.setStyleName("tabcontentflowlayout");
 		loginflow.setStyleName("tabcontentflowlayout");
 
 		tabpanel.add(loginflow, uiText.Login());
-		// tabpanel.add(registerflow, uiText.Register());
-
+		
+		// if registration is enabled
+		if (OswClient.getInstance().getPreference("registration_allowed").equals("true")) {
+			tabpanel.add(registerflow, uiText.Register());
+		}
+		
 		rememberme.addStyleName("checkbox");
 
 		loginflow.add(loginError);
@@ -155,6 +163,13 @@ public class LoginDialog extends AbstractDialog {
 		registerflow.add(emailRegister);
 		registerflow.add(emailTextRegister);
 		registerflow.add(emailRegisterError);
+		
+		// if registration via a registration code only is enabled
+		if (OswClient.getInstance().getPreference("registration_code").equals("true")) {
+			registerflow.add(codeRegister);
+			registerflow.add(codeTextRegister);
+			registerflow.add(codeRegisterError);
+		}
 
 		buttoncontainer.add(buttonLogin);
 		buttoncontainer.add(buttonRegister);
@@ -173,8 +188,7 @@ public class LoginDialog extends AbstractDialog {
 
 		// this.handler = handler;
 		// build and init dialog
-		setText("Welcome to "
-				+ OswClient.getInstance().getPreference("service_name"));
+		setText(uiMessages.WelcomeToServer(OswClient.getInstance().getPreference("service_name")));
 		// center();
 
 		tabpanel.addSelectionHandler(new SelectionHandler<Integer>() {
@@ -264,7 +278,7 @@ public class LoginDialog extends AbstractDialog {
 					@Override
 					public void onFailure() {
 						loginError
-								.setText("User does not exist or wrong password. Please try again!");
+								.setText(uiText.LoginFailure());
 						loginError.setVisible(true);
 					}
 

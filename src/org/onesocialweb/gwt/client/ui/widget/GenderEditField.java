@@ -16,18 +16,18 @@
  */
 package org.onesocialweb.gwt.client.ui.widget;
 
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.model.vcard4.GenderField;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 
 public class GenderEditField extends Composite {
 	
-	// String for internationalization
-	private final static String MALE = "Male";
-	private final static String FEMALE = "Female";
-	private final static String NOTKNOWN = "Unknown";
-	private final static String NOTAPPLICABLE = "Not applicable";
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT
+			.create(UserInterfaceText.class);
 	
 	private ListBox genderList = new ListBox();
 	
@@ -63,10 +63,11 @@ public class GenderEditField extends Composite {
 	
 	private void initValues() {
 		
-		genderList.addItem(NOTKNOWN, GenderField.Type.NOTKNOWN.toString());
-		genderList.addItem(MALE, GenderField.Type.MALE.toString());
-		genderList.addItem(FEMALE, GenderField.Type.FEMALE.toString());
-		genderList.addItem(NOTAPPLICABLE, GenderField.Type.NOTAPPLICABLE.toString());
+		genderList.addItem("");
+		genderList.addItem(uiText.NotKnown(), GenderField.Type.NOTKNOWN.toString());
+		genderList.addItem(uiText.Male(), GenderField.Type.MALE.toString());
+		genderList.addItem(uiText.Female(), GenderField.Type.FEMALE.toString());
+		genderList.addItem(uiText.NotApplicable(), GenderField.Type.NOTAPPLICABLE.toString());
 		
 	}
 }

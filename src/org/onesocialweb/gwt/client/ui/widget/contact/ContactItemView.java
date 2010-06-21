@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.ContactButtonHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceMessages;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
 import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
 import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
@@ -34,6 +36,7 @@ import org.onesocialweb.gwt.service.RosterItem.Presence;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.vcard4.Profile;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasMouseOutHandlers;
@@ -50,13 +53,17 @@ import com.google.gwt.user.client.ui.Label;
 
 public class ContactItemView extends FlowPanel implements MouseOverHandler,
 		HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	private UserInterfaceMessages uiMessages = (UserInterfaceMessages) GWT.create(UserInterfaceMessages.class);
+	
 	private HTML statusLabel = new HTML();
 	private Label infoLabel = new Label();
-	private final Label followingLabel = new Label("Following");
+	private final Label followingLabel = new Label(uiText.Following());
 
 	private StyledTooltipImage avatarImage = new StyledTooltipImage("", "link",
-			"View profile");
+			uiText.ViewProfile());
 	private StyledFlowPanel avatarwrapper = new StyledFlowPanel("avatarwrapper");
 	private HorizontalPanel hpanel = new HorizontalPanel();
 	private StyledTooltipImage statusIcon = new StyledTooltipImage(OswClient
@@ -225,7 +232,7 @@ public class ContactItemView extends FlowPanel implements MouseOverHandler,
 			}
 		}
 
-		info += "Listed as: " + tags;
+		info += uiMessages.ListedAsTags(tags);
 
 		if (tags != null && tags.length() > 0) {
 			infowrapper.add(infoIcon);
@@ -242,32 +249,32 @@ public class ContactItemView extends FlowPanel implements MouseOverHandler,
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
 					"theme_folder")
 					+ "assets/i-chatty.png");
-			statusIcon.setTitle("In a chatty mood!");
+			statusIcon.setTitle(uiText.Chatty());
 		} else if (presence.equals(Presence.away)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
 					"theme_folder")
 					+ "assets/i-away.png");
-			statusIcon.setTitle("Away");
+			statusIcon.setTitle(uiText.Away());
 		} else if (presence.equals(Presence.dnd)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
 					"theme_folder")
 					+ "assets/i-dnd.png");
-			statusIcon.setTitle("Do not disturb");
+			statusIcon.setTitle(uiText.DoNotDisturb());
 		} else if (presence.equals(Presence.xa)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
 					"theme_folder")
 					+ "assets/i-xaway.png");
-			statusIcon.setTitle("Away for a while");
+			statusIcon.setTitle(uiText.ExtendedAway());
 		} else if (presence.equals(Presence.available)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
 					"theme_folder")
 					+ "assets/i-available.png");
-			statusIcon.setTitle("Online");
+			statusIcon.setTitle(uiText.Online());
 		} else {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
 					"theme_folder")
 					+ "assets/i-notavailable.png");
-			statusIcon.setTitle("Not available");
+			statusIcon.setTitle(uiText.NotAvailable());
 		}
 	}
 

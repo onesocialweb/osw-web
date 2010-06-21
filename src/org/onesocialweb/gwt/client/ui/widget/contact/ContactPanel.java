@@ -21,6 +21,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.onesocialweb.gwt.client.handler.ContactButtonHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceMessages;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
@@ -30,11 +32,15 @@ import org.onesocialweb.gwt.service.RosterItem;
 import org.onesocialweb.gwt.util.Observer;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
 public class ContactPanel extends AbstractContactPanel<ContactItemView> {
-
+	
+	// internationalization
+	private UserInterfaceMessages uiMessages = (UserInterfaceMessages) GWT.create(UserInterfaceMessages.class);
+	
 	private final ContactButtons buttons = new ContactButtons();
 	private final StyledFlowPanel toolbar = new StyledFlowPanel("toolbar");
 	private final FlowPanel contacts = new FlowPanel();
@@ -79,7 +85,7 @@ public class ContactPanel extends AbstractContactPanel<ContactItemView> {
 		List<RosterItem> items = roster.getItems();
 
 		// Show nr of connections
-		connectionsCount.setText("You have " + items.size() + " connections");
+		connectionsCount.setText(uiMessages.YouHaveNConnections(items.size()));
 
 		// sort alphabetically
 		Collections.sort(items, new Comparator<RosterItem>() {
@@ -135,8 +141,6 @@ public class ContactPanel extends AbstractContactPanel<ContactItemView> {
 		@Override
 		public void handleEvent(RosterEvent event) {
 			repaint();
-			Log.debug("Contact repainted following a "
-					+ event.getType().toString() + " roster event");
 		}
 
 	}

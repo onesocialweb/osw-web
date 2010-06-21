@@ -17,7 +17,9 @@
 package org.onesocialweb.gwt.client.ui.widget;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -29,6 +31,9 @@ import com.reveregroup.gwt.imagepreloader.FitImage;
 
 public class PictureThumbnail extends Composite {
 
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private final FlowPanel thumbnailwrapper = new FlowPanel();
 	private final FlowPanel thumbnail = new FlowPanel();
 	private final FlowPanel actions = new FlowPanel();
@@ -54,7 +59,7 @@ public class PictureThumbnail extends Composite {
 		thumbnailwrapper.add(thumbnail);
 
 		// set tooltips
-		buttonDelete.setTitle("Remove picture");
+		buttonDelete.setTitle(uiText.RemovePicture());
 
 		// styles
 		thumbnail.addStyleName("thumbnail");

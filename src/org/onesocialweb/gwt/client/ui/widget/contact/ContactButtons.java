@@ -17,6 +17,7 @@
 package org.onesocialweb.gwt.client.ui.widget.contact;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
 import org.onesocialweb.gwt.service.OswService;
@@ -24,19 +25,24 @@ import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.gwt.service.RosterItem;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 
 public class ContactButtons extends FlowPanel {
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private TooltipPushButton deleteButton = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
-					+ "assets/i-delete.png"), "Delete from your contacts");
+					+ "assets/i-delete.png"), uiText.DeleteFromContacts());
 	private TooltipPushButton shoutButton = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
 					+ "assets/i-shout.png"),
-			"Shout and send a public message to this person");
+			uiText.ShoutToContact());
 	private String jid = "";
 
 	public ContactButtons() {
@@ -69,8 +75,8 @@ public class ContactButtons extends FlowPanel {
 			@Override
 			public void onClick(ClickEvent event) {
 				AlertDialog.getInstance().showDialog(
-						"Sorry this feature is not yet implemented.",
-						"We're working on this");
+						uiText.FeatureNotImplemented(),
+						uiText.WorkingOnThis());
 			}
 
 		});

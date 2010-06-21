@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.ActivityButtonHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
 import org.onesocialweb.gwt.client.ui.dialog.PicturePreviewDialog;
 import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
@@ -46,6 +47,7 @@ import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.atom.AtomReplyTo;
 import org.onesocialweb.model.vcard4.Profile;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasMouseOutHandlers;
@@ -62,11 +64,14 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private HTML statusLabel = new HTML();
 	private HTML infoLabel = new HTML();
 	private StyledTooltipImage avatarImage = new StyledTooltipImage("", "link",
-			"View profile");
+			uiText.ViewProfile());
 	private StyledFlowPanel avatarwrapper = new StyledFlowPanel("avatarwrapper");
 	private StyledTooltipImage infoIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
@@ -105,14 +110,14 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		final OswService service = OswServiceFactory.getService();
 
 		if (activity.hasRecipients()) {
-			authorWrapper.add(new StyledLabel("separator", " to "));
+			authorWrapper.add(new StyledLabel("separator", " " + uiText.To() + " "));
 			Iterator<AtomReplyTo> recipients = activity.getRecipients()
 					.iterator();
 			while (recipients.hasNext()) {
 				final AtomReplyTo recipient = recipients.next();
 				final String recipientJID = recipient.getHref();
 				final StyledLabel label = new StyledLabel("link", recipientJID);
-				label.setTitle("View profile of " + recipientJID);
+				label.setTitle(uiText.ViewProfileOf() + recipientJID);
 
 				service.getProfile(recipientJID,
 						new RequestCallback<Profile>() {
@@ -184,7 +189,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 						AclAction.PERMISSION_GRANT)) {
 					for (AclSubject subject : rule.getSubjects()) {
 						if (subject.getType().equals(AclSubject.EVERYONE)) {
-							visibility.add("Everyone");
+							visibility.add(uiText.Everyone());
 						} else if (subject.getType().equals(AclSubject.GROUP)) {
 							visibility.add(subject.getName());
 						} else if (subject.getType().equals(AclSubject.PERSON)) {
@@ -202,12 +207,12 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		String info = "";
 		info += getFormattedDate(activity.getPublished());
 		if (!visibility.isEmpty())
-			info += " - Visible to: " + FormatHelper.implode(visibility, ", ");
+			info += " - " + uiText.VisibleTo() + " " + FormatHelper.implode(visibility, ", ");
 		// if (location != "") info += " - From: " + location;
 		// if (tags != "") info += " - Tagged: " + tags;
 
 		infoLabel.setText(info);
-		author.setTitle("View profile of " + activity.getActor().getUri());
+		author.setTitle(uiText.ViewProfileOf() + " " + activity.getActor().getUri());
 
 		// check for any attachments
 		for (int i = 0; i < activity.getObjects().size(); i++) {
@@ -386,7 +391,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				// get the link to the image
 				final StyledTooltipImage image = new StyledTooltipImage(object
 						.getLinks().get(i).getHref(), "attachment",
-						"Show preview of original");
+						uiText.ShowPreview());
 
 				image.addStyleName("link");
 
@@ -419,7 +424,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				image.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent event) {
 						PicturePreviewDialog.getInstance().showDialog(
-								image.getUrl(), "Image preview");
+								image.getUrl(), uiText.ImagePreview());
 					}
 				});
 			}

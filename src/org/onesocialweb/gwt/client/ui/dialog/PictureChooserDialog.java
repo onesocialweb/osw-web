@@ -17,8 +17,10 @@
 package org.onesocialweb.gwt.client.ui.dialog;
 
 import org.onesocialweb.gwt.client.handler.PictureHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.SingleUploader;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -33,7 +35,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PictureChooserDialog extends AbstractDialog {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private final PictureHandler handler;
 	private TabPanel tabpanel = new TabPanel();
 	private int currentTab = 0;
@@ -46,16 +51,16 @@ public class PictureChooserDialog extends AbstractDialog {
 		this.handler = handler;
 
 		// overall widgets
-		Button buttonAdd = new Button("Add");
-		Button buttonCancel = new Button("Cancel");
+		Button buttonAdd = new Button(uiText.Add());
+		Button buttonCancel = new Button(uiText.Cancel());
 		VerticalPanel vpanel1 = new VerticalPanel();
 		HorizontalPanel buttoncontainer = new HorizontalPanel();
 
 		// various tab widgets
 		FlowPanel uploadflow = new FlowPanel();
 		FlowPanel urlflow = new FlowPanel();
-		Label label1 = new Label("Select a file.");
-		Label label2 = new Label("Enter picture url.");
+		Label label1 = new Label(uiText.SelectFile());
+		Label label2 = new Label(uiText.SelectPictureUrl());
 		Grid urlcontainer = new Grid(1, 2);
 
 		// set styles
@@ -68,14 +73,14 @@ public class PictureChooserDialog extends AbstractDialog {
 		// create parts
 		uploadflow.add(label1);
 		uploadflow.add(defaultUploader);
-		urlcontainer.setWidget(0, 0, new Label("URL:"));
+		urlcontainer.setWidget(0, 0, new Label(uiText.Url()));
 		urlcontainer.setWidget(0, 1, url);
 
 		urlflow.add(label2);
 		urlflow.add(urlcontainer);
 
-		tabpanel.add(urlflow, "From URL");
-		tabpanel.add(uploadflow, "Upload");
+		tabpanel.add(urlflow, uiText.FromUrl());
+		tabpanel.add(uploadflow, uiText.Upload());
 		// tabpanel.add(label3, "From Gallery");
 
 		buttoncontainer.add(buttonAdd);
@@ -85,7 +90,7 @@ public class PictureChooserDialog extends AbstractDialog {
 		vpanel1.add(buttoncontainer);
 
 		// build and init dialog
-		setText("Add Picture");
+		setText(uiText.AddPicture());
 		url.setText("");
 		setWidget(vpanel1);
 		tabpanel.selectTab(0);
@@ -109,8 +114,8 @@ public class PictureChooserDialog extends AbstractDialog {
 					AlertDialog
 							.getInstance()
 							.showDialog(
-									"Please wait for the file to upload first, then try again",
-									"Cannot add picture yet");
+									uiText.WaitForUpload(),
+									uiText.CannotAddPicture());
 				}
 			}
 		});

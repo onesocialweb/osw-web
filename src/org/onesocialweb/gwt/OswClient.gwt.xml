@@ -10,11 +10,10 @@
   <!-- Inherits components  --> 		  							
   <inherits name='com.reveregroup.gwt.imagepreloader.ImagePreloader' />
   <inherits name='eu.maydu.gwt.validation.ValidationLibrary' />
-  <inherits name='com.google.gwt.i18n.I18N'/>
   <inherits name='com.google.code.gwt.storage.Html5Storage' />
   
-  <extend-property name="locale" values="en"/>   
-  <!--  <extend-property name="locale" values="nl"/> -->
+  <!-- <extend-property name="locale" values="en"/> -->
+  <extend-property name="locale" values="nl"/> 
 
   <inherits name="com.allen_sauer.gwt.log.gwt-log" />
   

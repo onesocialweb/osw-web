@@ -16,10 +16,16 @@
  */
 package org.onesocialweb.gwt.client.ui.widget;
 
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class NameEditField extends Composite {
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 	
 	StyledTextBox firstField = new StyledTextBox("subtextbox", "", "150px");
 	//StyledTextBox middleField = new StyledTextBox("subtextbox", "", "75px");
@@ -27,9 +33,9 @@ public class NameEditField extends Composite {
 	
 	public NameEditField() {
 
-		StyledLabel firstLabel = new StyledLabel("sublabel", "First name");
+		StyledLabel firstLabel = new StyledLabel("sublabel", uiText.FirstName());
 		//StyledLabel middleLabel = new StyledLabel("sublabel", "Middle");
-		StyledLabel lastLabel = new StyledLabel("sublabel", "Surname");		
+		StyledLabel lastLabel = new StyledLabel("sublabel", uiText.Surname());		
 
 		HorizontalPanel container = new HorizontalPanel();
 		StyledFlowPanel firstpanel = new StyledFlowPanel("subpanel");

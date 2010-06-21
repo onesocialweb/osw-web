@@ -19,30 +19,38 @@ package org.onesocialweb.gwt.client.ui.widget.compose;
 import java.util.List;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
+import org.onesocialweb.gwt.client.ui.event.ComponentEvent;
+import org.onesocialweb.gwt.client.ui.event.ComponentListener;
 import org.onesocialweb.model.activity.ActivityObject;
+
+import com.google.gwt.core.client.GWT;
 
 public class ShoutAttachmentPanel extends AbstractAttachmentPanel {
 
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private RecipientList list = new RecipientList();
-
+	
 	public ShoutAttachmentPanel() {
-		setHeader("Shout to");
+		
+		setHeader(uiText.ShoutTo());
 		setVisible(false);
-		setTitle("Shout to these people");
 		setIcon(OswClient.getInstance().getPreference("theme_folder")
 				+ "assets/i-shout-r.png");
-		setCloseTooltip("Remove all people");
+		setCloseTooltip(uiText.ClearPeople());
 
 		// Compose the UI
-		add(list);
-		list.setFocus();
+		addList();
+		
 	}
 
 	@Override
 	public void reset() {
 		remove(list);
-		list = new RecipientList();
-		add(list);
+		addList();
+		
 	}
 
 	public List<String> getRecipients() {
@@ -53,6 +61,30 @@ public class ShoutAttachmentPanel extends AbstractAttachmentPanel {
 	protected void render(ActivityObject object) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private void addList() {
+		list = new RecipientList();
+		add(list);
+		
+		list.setFocus();
+		
+		list.addComponentListener(new ComponentListener() {
+			
+			@Override
+			public void componentShown(ComponentEvent e) {}
+			
+			@Override
+			public void componentResized(ComponentEvent e) {
+				fireComponentResized();
+			}
+			
+			@Override
+			public void componentMoved(ComponentEvent e) {}
+			
+			@Override
+			public void componentHidden(ComponentEvent e) {}
+		});
 	}
 
 }

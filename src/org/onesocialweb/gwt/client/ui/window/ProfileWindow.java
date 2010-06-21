@@ -17,12 +17,15 @@
 package org.onesocialweb.gwt.client.ui.window;
 
 import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addHTMLLabelRow;
+import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addWidgetRow;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
@@ -43,24 +46,36 @@ import org.onesocialweb.gwt.util.HtmlHelper;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.vcard4.BirthdayField;
+import org.onesocialweb.model.vcard4.DefaultGenderField;
+import org.onesocialweb.model.vcard4.EmailField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
+import org.onesocialweb.model.vcard4.NameField;
 import org.onesocialweb.model.vcard4.NoteField;
+import org.onesocialweb.model.vcard4.PhotoField;
 import org.onesocialweb.model.vcard4.Profile;
+import org.onesocialweb.model.vcard4.TelField;
+import org.onesocialweb.model.vcard4.URLField;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.reveregroup.gwt.imagepreloader.FitImage;
 
 public class ProfileWindow extends AbstractWindow {
 
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private String jid;
 	private FlowPanel summaryWrapper = new FlowPanel();
 	private FlowPanel summary = new FlowPanel();
@@ -81,20 +96,20 @@ public class ProfileWindow extends AbstractWindow {
 	private TooltipPushButton shoutButton = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
 					+ "assets/i-shout.png"),
-			"Shout and send a public message to this person");
+			uiText.ShoutToContact());
 	private TooltipPushButton followButton = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
-					+ "assets/i-following.png"), "Follow this person");
+					+ "assets/i-following.png"), uiText.FollowPerson());
 	private TooltipPushButton unfollowButton = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
-					+ "assets/i-unfollowing.png"), "Unfollow this person");
+					+ "assets/i-unfollowing.png"), uiText.UnfollowPerson());
 
 	private boolean isFollowing = false;
 	private boolean isSignedinUser = false;
 	private boolean hasProfile = false;
 
 	private final StyledLabel following = new StyledLabel("following",
-			"Following");
+			uiText.Following());
 	private final StyledLabel tagged = new StyledLabel("tagged", "");
 
 	private RosterEventHandler rosterhandler;
@@ -104,7 +119,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// setup window
 		setStyle("profileWindow");
-		setWindowTitle("Profile");
+		setWindowTitle(uiText.Profile());
 		enableClose();
 
 		// set profile ID
@@ -116,7 +131,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// Fetch the new profile
 		final DefaultTaskInfo task = new DefaultTaskInfo(
-				"Fetching the profile", false);
+				uiText.FetchingProfile(), false);
 		TaskMonitor.getInstance().addTask(task);
 		OswServiceFactory.getService().getProfile(jid,
 				new RequestCallback<Profile>() {
@@ -130,8 +145,8 @@ public class ProfileWindow extends AbstractWindow {
 						task.complete("", Status.failure);
 						model = null;
 						AlertDialog.getInstance().showDialog(
-										"Maybe the account does not exist anymore or the server is not available at the moment. This is why some features like following and shouting will not work for now.",
-										"Please note!");
+										uiText.AccountUnavailable(),
+										uiText.Oops());
 						composeWindow();
 						hasProfile = false;
 					}
@@ -159,10 +174,10 @@ public class ProfileWindow extends AbstractWindow {
 
 		TooltipPushButton message = new TooltipPushButton(new Image(OswClient
 				.getInstance().getPreference("theme_folder")
-				+ "assets/i-msg.png"), "Send private message");
+				+ "assets/i-msg.png"), uiText.SendPrivateMessage());
 		TooltipPushButton chat = new TooltipPushButton(new Image(OswClient
 				.getInstance().getPreference("theme_folder")
-				+ "assets/i-chat.png"), "Chat with this person");
+				+ "assets/i-chat.png"), uiText.ChatWithPerson());
 		FlowPanel activities = new FlowPanel();
 		FeedPanel activityPanel = new FeedPanel();
 		Stream<ActivityEntry> userActivities = OswServiceFactory.getService().getActivities(jid);
@@ -199,7 +214,7 @@ public class ProfileWindow extends AbstractWindow {
 			}
 		}
 
-		StyledLabel you = new StyledLabel("you", "you");
+		StyledLabel you = new StyledLabel("you", uiText.You());
 
 		displaynamewrapper.add(displayname);
 		if (isSignedinUser)
@@ -262,21 +277,15 @@ public class ProfileWindow extends AbstractWindow {
 			if (model.getNote() != null) {
 				if (model != null && bio != null && bio.length() > 0) {
 					StyledLabel aboutme = new StyledLabel("aboutme",
-							"<span>Bio </span> " + HtmlHelper.encode(bio));
+							"<span>" + uiText.Bio() + "</span> " + HtmlHelper.encode(bio));
 					summary.add(aboutme);
 				}
 			}
 		}
 
-		// add relations
-		StyledLabel relations = new StyledLabel(
-				"relations",
-				"<span>Your relations </span> <a href=''>co-worker</a>, <a href=''>friend</a>, <a href=''>family</a>");
-		// summary.add(relations);
-
 		// add tags if any
 		if (tags.length() > 0) {
-			tagged.setHTML("<span>On your lists </span> " + HtmlHelper.encode(tags));
+			tagged.setHTML("<span>" + uiText.OnYourLists() + "</span> " + HtmlHelper.encode(tags));
 		} else {
 			tagged.setHTML("");
 		}
@@ -291,12 +300,12 @@ public class ProfileWindow extends AbstractWindow {
 
 		activities.add(activityPanel);
 
-		tabpanel.add(activities, "What's up");
-		tabpanel.add(details, "Full profile");
+		tabpanel.add(activities, uiText.Activities());
+		tabpanel.add(details, uiText.Profile());
 
 		// You don't need to manage yourself
 		if (!isSignedinUser)
-			tabpanel.add(manage, "Manage person");
+			tabpanel.add(manage, uiText.ManagePerson());
 
 		tabpanel.selectTab(0);
 
@@ -326,21 +335,16 @@ public class ProfileWindow extends AbstractWindow {
 
 							@Override
 							public void onFailure() {
-								System.out
-										.println("Subscription unsuccessful!");
-
 								// enable the button again
 								followButton.setEnabled(true);
 								AlertDialog
 										.getInstance()
 										.showDialog(
-												"Could not process your request to follow this person. Please try again later.",
-												"Oops, following failed");
+												uiText.AccountUnavailable(), uiText.Oops());
 							}
 
 							@Override
 							public void onSuccess(Object result) {
-								System.out.println("Subscription successful!");
 								isFollowing = true;
 
 								// the following label
@@ -370,20 +374,15 @@ public class ProfileWindow extends AbstractWindow {
 
 							@Override
 							public void onFailure() {
-								System.out
-										.println("Unsubscription unsuccessful!");
 								unfollowButton.setEnabled(true);
 								AlertDialog
 										.getInstance()
 										.showDialog(
-												"Could not process your request to unfollow this person. Please try again later.",
-												"Oops, unfollowing failed");
+												uiText.AccountUnavailable(), uiText.Oops());
 							}
 
 							@Override
 							public void onSuccess(Object result) {
-								System.out
-										.println("Unsubscription successful!");
 								isFollowing = false;
 
 								// the following label
@@ -444,7 +443,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// profile section
 		StyledFlowPanel sectionProfile = new StyledFlowPanel("section");
-		StyledLabel profileLabel = new StyledLabel("grouplabel", "Profile");
+		StyledLabel profileLabel = new StyledLabel("grouplabel", uiText.Profile());
 		StyledLabel profileInstruction = new StyledLabel("instruction", "");
 		details.add(sectionProfile);
 		sectionProfile.add(profileLabel);
@@ -453,7 +452,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// followers section
 		StyledFlowPanel sectionFollowers = new StyledFlowPanel("section");
-		StyledLabel followersLabel = new StyledLabel("grouplabel", "Followers");
+		StyledLabel followersLabel = new StyledLabel("grouplabel", uiText.Followers());
 		final StyledLabel followersInstruction = new StyledLabel("instruction",
 				"");
 		details.add(sectionFollowers);
@@ -463,7 +462,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// following section
 		StyledFlowPanel sectionFollowing = new StyledFlowPanel("section");
-		StyledLabel followingLabel = new StyledLabel("grouplabel", "Following");
+		StyledLabel followingLabel = new StyledLabel("grouplabel", uiText.FollowingPeople());
 		final StyledLabel followingInstruction = new StyledLabel("instruction",
 				"");
 		details.add(sectionFollowing);
@@ -474,29 +473,73 @@ public class ProfileWindow extends AbstractWindow {
 		profileInstruction.setVisible(false);
 
 		if (model != null && model.getFields().size() > 0) {
-
+			
 			// show the profile
 			sectionProfile.setVisible(true);
-
-			// check if fields are entered and display them on the Full profile
-			// tab
-			if (model.hasField(FullNameField.NAME)
-					&& FullNameField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Full name", model.getFullName());
+			
+			if (model.hasField(FullNameField.NAME)) {
+				String displayname = model.getFullName();
+				if (displayname != null && displayname.length() > 0)
+					addHTMLLabelRow(profile, uiText.DisplayName(), displayname);
+			}
+			
+			if (model.hasField(NameField.NAME)) {
+				String name = model.getName();
+				if (name != null && name.length() > 0)
+					addHTMLLabelRow(profile, uiText.FullName(), name);
 			}
 
-			if (model.hasField(BirthdayField.NAME)
-					&& BirthdayField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Birthday", model.getBirthday().toString());
+			if (model.hasField(BirthdayField.NAME)) {
+				Date birthday = model.getBirthday();
+				if (birthday != null) {
+					DateTimeFormat dtf = DateTimeFormat.getFormat("d MMMM yyyy");
+					String bday = dtf.format(birthday);
+					addHTMLLabelRow(profile, uiText.Birthday(), bday);
+				}	
 			}
 
-			if (model.hasField(GenderField.NAME)
-					&& GenderField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Gender", model.getGender().toString());
+			if (model.hasField(GenderField.NAME)) {
+				
+				String value = new String("");
+				
+				GenderField.Type gender = model.getGender();
+				
+				if (gender.equals(GenderField.Type.MALE)) {
+					value = uiText.Male();
+				} else if (gender.equals(GenderField.Type.FEMALE)) {
+					value = uiText.Female();
+				} else if (gender.equals(GenderField.Type.NOTKNOWN)) {
+					value = uiText.NotKnown();
+				} else if (gender.equals(GenderField.Type.NOTAPPLICABLE)) {
+					value = uiText.NotApplicable();
+				}
+				if (gender != null)
+					addHTMLLabelRow(profile, uiText.Gender(), value);
+				
 			}
 
-			if (model.hasField(NoteField.NAME) && NoteField.NAME.length() > 0) {
-				addHTMLLabelRow(profile, "Bio", model.getNote());
+			if (model.hasField(NoteField.NAME)) {
+				String bio = model.getNote();
+				if (bio != null && bio.length() > 0)
+					addHTMLLabelRow(profile, uiText.Bio(), bio);
+			}
+			
+			if (model.hasField(EmailField.NAME)) {
+				String email = model.getEmail();
+				if (email != null && email.length() > 0)
+					addHTMLLabelRow(profile, uiText.Email(), email);
+			}
+			
+			if (model.hasField(TelField.NAME)) {
+				String tel = model.getTel();
+				if (tel != null && tel.length() > 0)
+					addHTMLLabelRow(profile, uiText.Telephone(), tel);
+			}
+			
+			if (model.hasField(URLField.NAME)) {
+				String url = model.getUrl();
+				if (url != null && url.length() > 0)
+					addHTMLLabelRow(profile, uiText.Website(), url);
 			}
 
 		} else {
@@ -506,7 +549,7 @@ public class ProfileWindow extends AbstractWindow {
 			profile.setVisible(false);
 
 			// show message
-			String msg = "There is no profile available.";
+			String msg = uiText.FailedToGetProfile();
 			profileInstruction.setText(msg);
 			profileInstruction.setVisible(true);
 
@@ -514,7 +557,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// get the followers of this person
 		final DefaultTaskInfo task1 = new DefaultTaskInfo(
-				"Fetching the followers", false);
+				uiText.FetchingFollowers(), false);
 		TaskMonitor.getInstance().addTask(task1);
 
 		OswServiceFactory.getService().getSubscribers(jid,
@@ -548,7 +591,7 @@ public class ProfileWindow extends AbstractWindow {
 
 								Label follower = new Label(jid);
 								follower.addStyleName("link");
-								follower.setTitle("View profile of " + jid);
+								follower.setTitle(uiText.ViewProfileOf() + " " + jid);
 								followersPanel.add(follower);
 								follower.addClickHandler(new ClickHandler() {
 
@@ -572,7 +615,7 @@ public class ProfileWindow extends AbstractWindow {
 						} else {
 							// give a message if there are no followers
 							followersInstruction
-									.setText("There are no followers");
+									.setText(uiText.NoFollowers());
 						}
 
 					}
@@ -581,7 +624,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		// get the people who are being followed by this person
 		final DefaultTaskInfo task2 = new DefaultTaskInfo(
-				"Fetching who is following", false);
+				uiText.FetchingFollowing(), false);
 		TaskMonitor.getInstance().addTask(task2);
 
 		OswServiceFactory.getService().getSubscriptions(jid,
@@ -615,7 +658,7 @@ public class ProfileWindow extends AbstractWindow {
 
 								Label following = new Label(jid);
 								following.addStyleName("link");
-								following.setTitle("View profile of " + jid);
+								following.setTitle(uiText.ViewProfileOf() + " " + jid);
 								followingPanel.add(following);
 								following.addClickHandler(new ClickHandler() {
 
@@ -639,7 +682,7 @@ public class ProfileWindow extends AbstractWindow {
 						} else {
 							// give a message if no one is followed
 							followingInstruction
-									.setText("This person is not following anyone.");
+									.setText(uiText.NoFollowing());
 						}
 
 					}
@@ -681,9 +724,9 @@ public class ProfileWindow extends AbstractWindow {
 
 		// Add the lists
 		StyledFlowPanel sectionLists = new StyledFlowPanel("section");
-		StyledLabel tagsLabel = new StyledLabel("grouplabel", "Your lists");
+		StyledLabel tagsLabel = new StyledLabel("grouplabel", uiText.YourLists());
 		StyledLabel tagsInstruction = new StyledLabel("instruction",
-				"Add or remove this person from your lists below.");
+				uiText.AddOrRemovePerson());
 		// EditableTagsList manageTags = new EditableTagsList(jid);
 
 		OswService service = OswServiceFactory.getService();
@@ -738,13 +781,11 @@ public class ProfileWindow extends AbstractWindow {
 
 			// change lists if any
 			if (tags.length() > 0) {
-				tagged.setHTML("<span>On your lists </span> " + tags);
+				tagged.setHTML("<span>" + uiText.OnYourLists() + "</span>" + tags);
 			} else {
 				tagged.setHTML("");
 			}
 
-			Log.debug("Profile repainted following a "
-					+ event.getType().toString() + " roster event");
 		}
 
 	}

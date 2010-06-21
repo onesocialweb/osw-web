@@ -17,16 +17,21 @@
 package org.onesocialweb.gwt.client.ui.window;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.contact.ContactPanel;
 import org.onesocialweb.gwt.client.ui.widget.contact.SearchPanel;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ToggleButton;
 
 public class ContactsWindow extends AbstractWindow {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private final ContactPanel contactPanel = new ContactPanel();
 	private final ToggleButton toggleSearchPanel = new ToggleButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
@@ -36,7 +41,7 @@ public class ContactsWindow extends AbstractWindow {
 	@Override
 	protected void onInit() {
 		setStyle("contactsWindow");
-		setWindowTitle("Contacts");
+		setWindowTitle(uiText.Contacts());
 		composeWindow();
 	}
 
@@ -78,7 +83,7 @@ public class ContactsWindow extends AbstractWindow {
 		toggleSearchPanel.setDown(true);
 
 		getActions().add(toggleSearchPanel);
-		toggleSearchPanel.setTitle("Show search panel");
+		toggleSearchPanel.setTitle(uiText.ShowSearchPanel());
 		toggleSearchPanel.addStyleDependentName("toggleShowUpdate");
 
 		getContents().add(contactPanel);

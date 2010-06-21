@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onesocialweb.gwt.client.handler.LoginHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
 import org.onesocialweb.gwt.client.ui.application.ActivityApplication;
 import org.onesocialweb.gwt.client.ui.application.ContactsApplication;
@@ -29,18 +30,25 @@ import org.onesocialweb.gwt.client.ui.application.PreferencesApplication;
 import org.onesocialweb.gwt.client.ui.dialog.LoginDialog;
 import org.onesocialweb.gwt.client.ui.menu.MainMenu;
 import org.onesocialweb.gwt.client.ui.menu.MenuCommand;
+import org.onesocialweb.gwt.client.util.OSWUrlBuilder;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 
 import com.google.code.gwt.storage.client.Storage;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.Location;
 
 public class OswClient {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	private static OswClient instance;
 
 	private Map<String, String> preferences = new HashMap<String, String>();
@@ -49,6 +57,7 @@ public class OswClient {
 	private MainMenu mainMenu;
 	private AbstractApplication currentApplication;
 	private HashMap<String, MenuCommand> applicationCommands = new HashMap<String, MenuCommand>();
+	private HashMap<String, String> OSWLocales = new HashMap<String, String>();
 	private boolean sessionActive;
 
 	public static OswClient getInstance() {
@@ -59,6 +68,10 @@ public class OswClient {
 	}
 
 	public void start() {
+		
+		// set the locale if defined
+		setLocale();
+		
 		// Prepare the environment
 		this.service = OswServiceFactory.getService();
 		loadPreferences();
@@ -188,14 +201,62 @@ public class OswClient {
 				});
 	}
 
+	private void setLocale() {
+		
+		// set locale based on the presence of a stored value in the LocalStorage
+		
+		// Set the available OSW locale values
+		initLocales();
+		
+		// get the locale parameter from the url
+		String localeUrl = Location.getParameter("locale");
+		
+		// get the locale from the storage
+		String localeStored = "";
+		if (Storage.isSupported()) {
+			Storage localStorage = Storage.getLocalStorage();
+			localeStored = localStorage.getItem("locale");
+		}
+		
+		// if the locale is not present
+		if (localeUrl == null && localeStored != null) {
+			
+			if (OSWLocales.containsKey(localeStored)) {
+				OSWUrlBuilder urlBuilder = new OSWUrlBuilder();
+				urlBuilder.setParameter("locale", localeStored); 
+				Window.Location.replace(urlBuilder.buildString());
+			} else {
+				OSWUrlBuilder urlBuilder = new OSWUrlBuilder();
+				urlBuilder.removeParameter("locale"); 
+				Window.Location.replace(urlBuilder.buildString());
+			}
+			
+		}
+	}
+	
 	private void createSession() {
+		
 		sessionActive = true;
-
+		
 		// create a new mainmenu
 		initMenu();
 
 		// fire the first application
-		showApplication("ActivityApplication");
+		
+		// if there is an application in the URL use that
+		// get the locale parameter from the url
+		String hash = Location.getHash();
+		String application = "";
+		// remove the hash sign
+		if (hash != null && hash.length() > 0) {
+			application = hash.substring(1);
+		}
+		
+		if (application.length() > 0) {
+			showApplication(application);
+		} else {
+			showApplication("ActivityApplication");
+		}
 	}
 
 	private void destroySession() {
@@ -217,7 +278,12 @@ public class OswClient {
 		currentApplication.destroy();
 		currentApplication = null;
 	}
-
+	
+	private void initLocales() {
+		OSWLocales.put("default", "English");
+		OSWLocales.put("nl", "Nederlands");
+	}
+	
 	private void initMenu() {
 
 		List<MenuCommand> commands = new ArrayList<MenuCommand>();
@@ -239,6 +305,10 @@ public class OswClient {
 
 		mainMenu = new MainMenu(commands);
 		mainMenu.showMenu();
+	}
+
+	public HashMap<String, String> getOSWLocales() {
+		return OSWLocales;
 	}
 
 	private void loadPreferences() {
@@ -268,7 +338,7 @@ public class OswClient {
 
 		@Override
 		public String getLabel() {
-			return "What's up";
+			return uiText.Activities();
 		}
 
 		@Override
@@ -282,7 +352,7 @@ public class OswClient {
 
 		@Override
 		public String getLabel() {
-			return "Contacts";
+			return uiText.Contacts();
 		}
 
 		@Override
@@ -296,7 +366,7 @@ public class OswClient {
 
 		@Override
 		public String getLabel() {
-			return "Preferences";
+			return uiText.Preferences();
 		}
 
 		@Override
@@ -310,7 +380,7 @@ public class OswClient {
 
 		@Override
 		public String getLabel() {
-			return "Sign out";
+			return uiText.Logout();
 		}
 
 		@Override

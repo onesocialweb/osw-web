@@ -17,6 +17,7 @@
 package org.onesocialweb.gwt.client.ui.widget.contact;
 
 import org.onesocialweb.gwt.client.OswClient;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
@@ -30,6 +31,7 @@ import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.model.vcard4.Profile;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -38,14 +40,17 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Composite;
 
 public class SearchPanel extends Composite {
-
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
+	
 	final StyledTextBox input = new StyledTextBox("bigtextbox", "", "");
 
 	public SearchPanel() {
 
 		StyledFlowPanel searchPanel = new StyledFlowPanel("addPanel");
 		StyledHorizontalPanel hpanel = new StyledHorizontalPanel("middle");
-		StyledButton show = new StyledButton("bigbutton", "Search");
+		StyledButton show = new StyledButton("bigbutton", uiText.Search());
 
 		hpanel.add(input);
 		hpanel.add(show);
@@ -98,13 +103,13 @@ public class SearchPanel extends Composite {
 			AlertDialog
 					.getInstance()
 					.showDialog(
-							"Please use the format name@domain e.g. alice@wonderland.lit",
-							"Oops cannot search this");
+							uiText.PleaseUseUserAtDomain(),
+							uiText.OopsCannotSearch());
 		} else {
 
 			// Check if JID exists
 			final DefaultTaskInfo task = new DefaultTaskInfo(
-					"Fetching the profile", false);
+					uiText.FetchingProfile(), false);
 			TaskMonitor.getInstance().addTask(task);
 			OswServiceFactory.getService().getProfile(input.getText(),
 					new RequestCallback<Profile>() {
@@ -115,8 +120,8 @@ public class SearchPanel extends Composite {
 							AlertDialog
 									.getInstance()
 									.showDialog(
-											"Maybe the account does not exist or the server is not available at the moment. Please doublecheck the socialweb address or try again later.",
-											"Failed to get profile");
+											uiText.AccountUnavailable(),
+											uiText.FailedToGetProfile());
 						}
 
 						@Override

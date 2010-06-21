@@ -7,6 +7,8 @@ import org.appfuse.client.widget.BulletList;
 import org.appfuse.client.widget.ListItem;
 import org.appfuse.client.widget.Paragraph;
 import org.appfuse.client.widget.Span;
+import org.onesocialweb.gwt.client.ui.event.ComponentHelper;
+import org.onesocialweb.gwt.client.ui.event.ComponentListener;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,6 +38,8 @@ public class RecipientList extends Composite {
 	private final SuggestBox box = new SuggestBox(oracle, itemBox);
 
 	private List<String> itemsSelected = new ArrayList<String>();
+	
+	private final ComponentHelper componentHelper = new ComponentHelper();
 
 	public RecipientList() {
 		FlowPanel panel = new FlowPanel();
@@ -89,6 +93,7 @@ public class RecipientList extends Composite {
 						}
 						list.remove(li);
 						itemBox.setFocus(true);
+						fireComponentResized();
 					}
 				}
 
@@ -136,12 +141,11 @@ public class RecipientList extends Composite {
 			}
 		});
 
-		box
-				.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-					public void onSelection(SelectionEvent selectionEvent) {
-						deselectItem(itemBox, list);
-					}
-				});
+		box.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+			public void onSelection(SelectionEvent selectionEvent) {
+				deselectItem(itemBox, list);
+			}
+		});
 
 		panel.add(list);
 
@@ -160,6 +164,14 @@ public class RecipientList extends Composite {
 		 * /> </li> </ul>
 		 */
 	}
+	
+	public void addComponentListener(ComponentListener listener) {
+		componentHelper.addComponentListener(listener);
+	}
+
+	public void removeComponentListener(ComponentListener listener) {
+		componentHelper.removeComponentListener(listener);
+	}
 
 	public void setFocus() {
 		box.setFocus(true);
@@ -171,6 +183,22 @@ public class RecipientList extends Composite {
 			result.add(oracle.getJid(recipient));
 		}
 		return result;
+	}
+	
+	protected void fireComponentResized() {
+		componentHelper.fireComponentResized(this);
+	}
+
+	protected void fireComponentShown() {
+		componentHelper.fireComponentShown(this);
+	}
+
+	protected void fireComponentHidden() {
+		componentHelper.fireComponentHidden(this);
+	}
+
+	protected void fireComponentMoved() {
+		componentHelper.fireComponentMoved(this);
 	}
 
 	private void deselectItem(final TextBox itemBox, final BulletList list) {
@@ -223,6 +251,9 @@ public class RecipientList extends Composite {
 			list.insert(displayItem, list.getWidgetCount() - 1);
 			itemBox.setValue("");
 			itemBox.setFocus(true);
+			
+			// notify the container that the List has changed
+			fireComponentResized();
 		}
 	}
 
@@ -232,6 +263,8 @@ public class RecipientList extends Composite {
 		itemsSelected.remove(displayItem.getWidget(0).getElement()
 				.getInnerHTML());
 		list.remove(displayItem);
+		
+		fireComponentResized();
 	}
 
 }
