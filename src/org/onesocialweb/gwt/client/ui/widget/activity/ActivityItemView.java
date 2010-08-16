@@ -92,6 +92,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private StyledLabel author = new StyledLabel("link", "");
 
 	public ActivityItemView(final ActivityEntry activity) {
+				
+		
 		this.activity = activity;
 		
 		// add the mouseOver handlers
@@ -108,8 +110,19 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		author.setText(activity.getActor().getName());
 		authorWrapper.add(author);
 		final OswService service = OswServiceFactory.getService();
+		
+		boolean isComment=false;
+        List<AtomReplyTo> recs=activity.getRecipients();
+        Iterator<AtomReplyTo> itRecipients=recs.iterator();
 
-		if (activity.hasRecipients()) {
+        while (itRecipients.hasNext()){
+                AtomReplyTo recipient=itRecipients.next();
+                if (recipient.getHref().contains("?;node"))
+                        isComment=true;
+        }
+
+
+        if ((!isComment) && (activity.hasRecipients())) {
 			authorWrapper.add(new StyledLabel("separator", " " + uiText.To() + " "));
 			Iterator<AtomReplyTo> recipients = activity.getRecipients()
 					.iterator();
