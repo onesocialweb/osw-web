@@ -61,6 +61,8 @@ public class ListSelector extends FlowPanel {
 		// get all available lists for your complete roster
 		OswService service = OswServiceFactory.getService();
 		Set<String> groups = service.getRoster().getGroups();
+		
+		
 
 		// try to get all the lists this person is on
 		try {
@@ -72,7 +74,8 @@ public class ListSelector extends FlowPanel {
 		// add all lists as checkboxes
 		if (groups.size() > 0) {
 			for (String list : groups) {
-				addCheckbox(list, false);
+				if (list!=null)
+					addCheckbox(list, false);
 			}
 		}
 
@@ -102,7 +105,7 @@ public class ListSelector extends FlowPanel {
 
 				// is the item is checked?
 				if (event.getValue() == true
-						&& !listed.contains(checkbox.getText())) {
+						&& !listed.contains(checkbox.getText()) && checkbox.getText()!=null  && checkbox.getText().length()!=0)  {
 					// set the values
 					listed.add(checkbox.getText());
 					rosterItem.setGroups(listed);
@@ -184,8 +187,10 @@ public class ListSelector extends FlowPanel {
 			checkbox.fireEvent(new ValueChangeEvent<Boolean>(true) {
 			});
 		}
-		wrapper.add(checkbox);
-		wrapper.add(fix);
+		if  (checkbox.getText()!=null  && checkbox.getText().length()!=0) {
+			wrapper.add(checkbox);
+			wrapper.add(fix);
+		}
 
 	}
 }
