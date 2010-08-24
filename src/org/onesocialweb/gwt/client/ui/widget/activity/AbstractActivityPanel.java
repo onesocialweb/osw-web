@@ -12,6 +12,13 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *  
+ *  2010-08-17 Modified by Luca Faggioli Copyright 2010 Openliven S.r.l
+ *  
+ *  added addEmptyModelMessage so that nothing is shown in the subclass 
+ *  RepliesPanel when the model is empty and getModelItems() so we can
+ *  sort the activities in RepliesPanel (for replies we put the oldest
+ *  on the top and the newest at the bottom 
  *    
  */
 package org.onesocialweb.gwt.client.ui.widget.activity;
@@ -32,7 +39,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
-	private Stream<T> model;
+	protected Stream<T> model;
 
 	private DefaultTaskInfo task;
 
@@ -50,9 +57,9 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
 	protected void repaint() {
 		clear();
-		List<T> items = model.getItems();
 
 		if (model.isReady()) {
+			List<T> items = getModelItems();
 			if (items.size() > 0) {
 				// render the items
 				for (int i = items.size(); i >= 1; i--) {
@@ -61,9 +68,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 				}
 			} else {
 				// if there are no results
-				StyledLabel msg = new StyledLabel("message",
-						"There are no status updates available.");
-				add(msg);
+				addEmptyModelMessage();
 			}
 
 			if (task != null) {
@@ -99,5 +104,14 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 		}
 
 	}
+	
+	protected void addEmptyModelMessage() {
+		StyledLabel msg = new StyledLabel("message",
+			"There are no status updates available.");
+		add(msg);
+	}
 
+	protected List<T> getModelItems() {
+		return model.getItems();
+	}
 }

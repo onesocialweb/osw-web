@@ -1,5 +1,5 @@
 /*
- *  Copyright 2010 Vodafone Group Services Ltd.
+ *  Copyright 2010 Openliven Srl.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,10 +12,14 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *  
+ *  Author: luca faggioli 	luca(dot)faggioli(at)openliven(dot)com
  *    
  */
 package org.onesocialweb.gwt.client.ui.widget.compose;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import org.onesocialweb.gwt.client.OswClient;
@@ -27,9 +31,11 @@ import org.onesocialweb.gwt.client.ui.dialog.PictureChooserDialog;
 import org.onesocialweb.gwt.client.ui.event.ComponentEvent;
 import org.onesocialweb.gwt.client.ui.event.ComponentHelper;
 import org.onesocialweb.gwt.client.ui.event.ComponentListener;
+import org.onesocialweb.gwt.client.ui.widget.activity.RepliesPanel;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
+import org.onesocialweb.gwt.service.Stream;
 import org.onesocialweb.gwt.util.ListModel;
 import org.onesocialweb.model.acl.AclAction;
 import org.onesocialweb.model.acl.AclRule;
@@ -48,7 +54,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 
-public class NewActivityPanel extends Composite {
+public class CommentPanel extends Composite {
 
 	public static final String EVERYONE = "Everyone";
 
@@ -58,9 +64,19 @@ public class NewActivityPanel extends Composite {
 
 	private final InternalComponentListener componentListener = new InternalComponentListener();
 
-	public NewActivityPanel() {
+	public CommentPanel() {
+	}
+
+	
+	public void compose(ActivityEntry parentActivity) {
+		this.parentActivity = parentActivity;
 		composePanel();
 	}
+	
+	public RepliesPanel getReplies() {
+		return replies;
+	}
+	
 
 	public void reset() {
 		// Empty the text area
@@ -72,13 +88,11 @@ public class NewActivityPanel extends Composite {
 
 		// Remove all attachments
 		pictureAttachmentPanel.reset();
-		privacyAttachmentPanel.reset();
-		shoutAttachmentPanel.reset();
+		//privacyAttachmentPanel.reset();
 
 		// And hide the panels
 		pictureAttachmentPanel.hide();
-		privacyAttachmentPanel.hide();
-		shoutAttachmentPanel.hide();
+		//privacyAttachmentPanel.hide();
 
 		// Fire a single resize event and reactivate the listener
 		componentHelper.fireComponentResized(this);
@@ -92,14 +106,105 @@ public class NewActivityPanel extends Composite {
 	public void removeComponentListener(ComponentListener listener) {
 		componentHelper.removeComponentListener(listener);
 	}
+	
+	public void hide() {
+		if (isVisible()) {
+			setVisible(false);
+			fireComponentHidden();
+		}
+	}
+	
+	
+	protected void fireComponentHidden() {
+		componentHelper.fireComponentHidden(this);
+	}
 
-	private void postStatusUpdate() {
-		// TODO disable the update panel during the update
+
+	// UI stuff
+	private void composePanel() {
+
+		// Init attachment dialogs
+		pictureChooserDialog = new PictureChooserDialog(new PictureHandler() {
+			public void handlePicture(String pictureUrl) {
+				if (pictureUrl != null && pictureUrl.length() > 0) {
+					OswService service = OswClient.getInstance().getService();
+					ActivityObject object = service.getActivityFactory()
+							.object(ActivityObject.PICTURE);
+					object.addLink(service.getAtomFactory().link(pictureUrl,
+							"alternate", null, null,0));
+					pictureAttachments.add(object);
+				}
+			}
+		});
+
+		Stream<ActivityEntry> repliesModel = OswServiceFactory.getService().getReplies(
+				parentActivity.getId());
+		replies.setModel(repliesModel);
+		
+		// Add components to page
+		flow.add(addPhoto);
+		//flow.add(addPrivacy);
+		flow.add(buttonUpdate);
+
+		// Create panel
+		statusPanel.add(replies);
+		statusPanel.add(textareaUpdate);
+		statusPanel.add(attachmentsPanel);
+		statusPanel.add(flow);
+
+		// AttachmentsPanel
+		pictureAttachmentPanel = new PictureAttachmentPanel();
+		pictureAttachmentPanel.setModel(pictureAttachments);
+		pictureAttachmentPanel.addComponentListener(componentListener);
+		attachmentsPanel.add(pictureAttachmentPanel);
+
+		//privacyAttachmentPanel = new PrivacyAttachmentPanel();
+		//privacyAttachmentPanel.addComponentListener(componentListener);
+		//attachmentsPanel.add(privacyAttachmentPanel);
+
+		// Add CSS classes
+		buttonUpdate.addStyleName("buttonUpdate");
+		attachment.addStyleName("updateLabel");
+		flow.addStyleName("options");
+		attachmentsPanel.addStyleName("attachmentWrapper");
+		statusPanel.setStyleName("topPanel");
+
+		// Set tooltips
+		addPhoto.setTitle("Add picture");
+		//addPrivacy.setTitle("Change privacy (default: Everyone)");
+		
+		initWidget(statusPanel);
+
+		buttonUpdate.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				postComment();
+			}
+		});
+
+
+		/*addPrivacy.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				privacyAttachmentPanel.show();
+			}
+		});*/
+
+		addPhoto.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				pictureChooserDialog.show();
+			}
+		});
+	}
+	
+	private void postComment() {
+		
+		buttonUpdate.setEnabled(false);
 		final OswService service = OswServiceFactory.getService();
-		final AtomFactory atomFactory = service.getAtomFactory();
 
 		Date now = new Date();
 		String status = textareaUpdate.getText();
+		
+		if(status==null || "".equals(status))
+			return;
 
 		ActivityObject object = service.getActivityFactory().object(
 				ActivityObject.STATUS_UPDATE);
@@ -113,17 +218,21 @@ public class NewActivityPanel extends Composite {
 		entry.addVerb(service.getActivityFactory().verb(ActivityVerb.POST));
 		entry.addObject(object);
 		entry.setPublished(now);
+		
+		String href = "xmpp:"+parentActivity.getActor().getUri()+
+			"?;node=urn:xmpp:microblog:0;item="+parentActivity.getId();
+		entry.addLink(service.getAtomFactory().link(href, "alternate", null, 
+				"text/html", 0));
+		entry.addRecipient(service.getAtomFactory().reply(parentActivity.getId(), href, 
+				null, null));
 
 		// add attachments if there are any
 		for (ActivityObject current : pictureAttachments) {
 			entry.addObject(current);
 		}
-
-		// Add recipients if there are any
-		for (String recipient : shoutAttachmentPanel.getRecipients()) {
-			entry.addRecipient(atomFactory.reply(null, recipient, null, null));
-		}
-
+		
+		
+		/*
 		// setup access control
 		AclRule rule = service.getAclFactory().aclRule();
 		rule.addAction(service.getAclFactory().aclAction(AclAction.ACTION_VIEW,
@@ -140,131 +249,57 @@ public class NewActivityPanel extends Composite {
 					AclSubject.GROUP));
 		}
 		entry.addAclRule(rule);
+		*/
 
 		// we got everything we need -> clean up UI
 		reset();
 
-		// Prepare a task to monitor status
-		final DefaultTaskInfo task = new DefaultTaskInfo(
-				"Updating your status", false);
-		TaskMonitor.getInstance().addTask(task);
+		
 		service.post(entry, new RequestCallback<ActivityEntry>() {
 
 			@Override
 			public void onFailure() {
-				task.complete("Failed to update your status", Status.failure);
+			
 			}
 
 			@Override
 			public void onSuccess(ActivityEntry result) {
-				task.complete("Your status has been posted", Status.succes);
+				
 			}
 
 		});
+		
+		
+		replies.setModel(service.getReplies(parentActivity.getId()));
+		replies.repaint();
+		buttonUpdate.setEnabled(true);
+
 	}
 
-	// UI stuff
-	private void composePanel() {
-
-		// Init attachment dialogs
-		pictureChooserDialog = new PictureChooserDialog(new PictureHandler() {
-			public void handlePicture(String pictureUrl) {
-				if (pictureUrl != null && pictureUrl.length() > 0) {
-					OswService service = OswClient.getInstance().getService();
-					ActivityObject object = service.getActivityFactory()
-							.object(ActivityObject.PICTURE);
-					object.addLink(service.getAtomFactory().link(pictureUrl,
-							"alternate", null, null, 1));
-					pictureAttachments.add(object);
-				}
-			}
-		});
-
-		// Add components to page
-		flow.add(addRecipients);
-		flow.add(addPhoto);
-		flow.add(addPrivacy);
-		flow.add(buttonUpdate);
-
-		// Create panel
-		statusPanel.add(textareaUpdate);
-		statusPanel.add(attachmentsPanel);
-		statusPanel.add(flow);
-
-		// AttachmentsPanel
-		pictureAttachmentPanel = new PictureAttachmentPanel();
-		pictureAttachmentPanel.setModel(pictureAttachments);
-		pictureAttachmentPanel.addComponentListener(componentListener);
-		attachmentsPanel.add(pictureAttachmentPanel);
-
-		shoutAttachmentPanel = new ShoutAttachmentPanel();
-		shoutAttachmentPanel.addComponentListener(componentListener);
-		attachmentsPanel.add(shoutAttachmentPanel);
-
-		privacyAttachmentPanel = new PrivacyAttachmentPanel();
-		privacyAttachmentPanel.addComponentListener(componentListener);
-		attachmentsPanel.add(privacyAttachmentPanel);
-
-		// Add CSS classes
-		buttonUpdate.addStyleName("buttonUpdate");
-		attachment.addStyleName("updateLabel");
-		flow.addStyleName("options");
-		attachmentsPanel.addStyleName("attachmentWrapper");
-		statusPanel.setStyleName("topPanel");
-
-		// Set tooltips
-		addPhoto.setTitle("Add picture");
-		addPrivacy.setTitle("Change privacy (default: Everyone)");
-		addRecipients.setTitle("Shout publicly to specific people");
-
-		initWidget(statusPanel);
-
-		buttonUpdate.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				postStatusUpdate();
-			}
-		});
-
-		addRecipients.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				shoutAttachmentPanel.show();
-			}
-		});
-
-		addPrivacy.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				privacyAttachmentPanel.show();
-			}
-		});
-
-		addPhoto.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				pictureChooserDialog.show();
-			}
-		});
-	}
 
 	private PictureAttachmentPanel pictureAttachmentPanel;
-	private PrivacyAttachmentPanel privacyAttachmentPanel;
-	private ShoutAttachmentPanel shoutAttachmentPanel;
+	//private PrivacyAttachmentPanel privacyAttachmentPanel;
 	private PictureChooserDialog pictureChooserDialog;
 
 	private final FlowPanel statusPanel = new FlowPanel();
 	private final FlowPanel attachmentsPanel = new FlowPanel();
 	private final FlowPanel flow = new FlowPanel();
+	private final RepliesPanel replies = new RepliesPanel();
+	
 	private final Label attachment = new Label("Add:");
-	private final Button buttonUpdate = new Button("Share");
+	private final Button buttonUpdate = new Button("Post your comment");
 	private final TextareaUpdate textareaUpdate = new TextareaUpdate();
 
-	private final PushButton addRecipients = new PushButton(new Image(OswClient
-			.getInstance().getPreference("theme_folder")
-			+ "assets/i-shout.png"));
+	/*
 	private final PushButton addPrivacy = new PushButton(new Image(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-key.png"));
+	*/
 	private final PushButton addPhoto = new PushButton(new Image(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-camera2.png"));
+	
+	private ActivityEntry parentActivity;
 
 	private class InternalComponentListener implements ComponentListener {
 
