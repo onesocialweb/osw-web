@@ -18,9 +18,11 @@
  */
 package org.onesocialweb.gwt.client.ui.widget.compose;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.PictureHandler;
@@ -251,8 +253,14 @@ public class CommentPanel extends Composite {
 		entry.addAclRule(rule);
 		*/
 		
-		//we assume that the comment should inherit the ACL Rules from the original message (parent message)
-		entry.setAclRules(parentActivity.getAclRules());
+		//TODO: we build the default ACL for now, but we need to fix this since 
+		//comments cannot always be visible to Everyone
+		AclRule rule = service.getAclFactory().aclRule();
+		rule.addSubject(service.getAclFactory().aclSubject(null, AclSubject.EVERYONE));
+		rule.addAction(service.getAclFactory().aclAction(AclAction.ACTION_VIEW, AclAction.PERMISSION_GRANT));
+		List<AclRule> defaultRules = new ArrayList<AclRule>();
+		defaultRules.add(rule);
+		entry.setAclRules(defaultRules);
 
 		// we got everything we need -> clean up UI
 		reset();
