@@ -138,7 +138,7 @@ public class CommentPanel extends Composite {
 		});
 
 		Stream<ActivityEntry> repliesModel = OswServiceFactory.getService().getReplies(
-				parentActivity.getId());
+				parentActivity);
 		replies.setModel(repliesModel);
 		
 		// Add components to page
@@ -207,7 +207,7 @@ public class CommentPanel extends Composite {
 			return;
 
 		ActivityObject object = service.getActivityFactory().object(
-				ActivityObject.STATUS_UPDATE);
+				ActivityObject.COMMENT);
 		object.addContent(service.getAtomFactory().content(status,
 				"text/plain", null));
 		object.setPublished(now);
@@ -250,6 +250,9 @@ public class CommentPanel extends Composite {
 		}
 		entry.addAclRule(rule);
 		*/
+		
+		//we assume that the comment should inherit the ACL Rules from the original message (parent message)
+		entry.setAclRules(parentActivity.getAclRules());
 
 		// we got everything we need -> clean up UI
 		reset();
@@ -270,7 +273,7 @@ public class CommentPanel extends Composite {
 		});
 		
 		
-		replies.setModel(service.getReplies(parentActivity.getId()));
+		replies.setModel(service.getReplies(parentActivity));
 		replies.repaint();
 		buttonUpdate.setEnabled(true);
 
