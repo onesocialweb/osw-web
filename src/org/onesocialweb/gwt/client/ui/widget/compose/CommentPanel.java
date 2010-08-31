@@ -208,15 +208,22 @@ public class CommentPanel extends Composite {
 		if(status==null || "".equals(status))
 			return;
 
+		//above a certain length, we get an error from the BOSH server
+		//and the GUI hangs forever - we don't know yet what the limit 
+		//exactly is, but with 80 chars it works
+		StringBuffer limitedLengthStatus = new StringBuffer(status);
+		if(limitedLengthStatus.length() > 80)
+			limitedLengthStatus.setLength(80);
+		
 		ActivityObject object = service.getActivityFactory().object(
 				ActivityObject.COMMENT);
-		object.addContent(service.getAtomFactory().content(status,
+		object.addContent(service.getAtomFactory().content(limitedLengthStatus.toString(),
 				"text/plain", null));
 		object.setPublished(now);
 
 		// the basics
 		ActivityEntry entry = service.getActivityFactory().entry();
-		entry.setTitle(status);
+		entry.setTitle(limitedLengthStatus.toString());
 		entry.addVerb(service.getActivityFactory().verb(ActivityVerb.POST));
 		entry.addObject(object);
 		entry.setPublished(now);
