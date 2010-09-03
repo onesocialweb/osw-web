@@ -12,6 +12,9 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ *
+ *  2010-08-17 Modified by Luca Faggioli Copyright 2010 Openliven S.r.l
+ *  added .replies-link 
  *    
  */
  
@@ -415,6 +418,20 @@ img.logo {
 }
 
 .link:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.replies-link {
+	display: inline;
+	color: #4082D7;
+	cursor: pointer;
+	font-size: .7em;
+	margin: 0px 0px;
+	line-height: 100%;
+}
+
+.replies-link:hover {
 	text-decoration: underline;
 	cursor: pointer;
 }
@@ -1235,6 +1252,7 @@ img.logo {
 	color: #666;
 	
 }
+
 
 .statusActivity .gwt-HTML, .contact .gwt-HTML{
 	display: inline;
