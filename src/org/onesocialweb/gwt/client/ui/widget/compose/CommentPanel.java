@@ -227,12 +227,14 @@ public class CommentPanel extends Composite {
 		entry.setParentId(parentActivity.getId());
 		entry.setParentJID(parentActivity.getActor().getUri());
 		
+		/*
 		String href = "xmpp:"+parentActivity.getActor().getUri()+
 			"?;node=urn:xmpp:microblog:0;item="+parentActivity.getId();
 		entry.addLink(service.getAtomFactory().link(href, "alternate", null, 
 				"text/html", 0));
 		entry.addRecipient(service.getAtomFactory().reply(parentActivity.getId(), href, 
 				null, null));
+		*/
 		
 		// add attachments if there are any
 		for (ActivityObject current : pictureAttachments) {
