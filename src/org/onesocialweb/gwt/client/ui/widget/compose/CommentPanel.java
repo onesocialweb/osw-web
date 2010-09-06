@@ -208,12 +208,9 @@ public class CommentPanel extends Composite {
 		if(status==null || "".equals(status))
 			return;
 
-		//above a certain length, we get an error from the BOSH server
-		//and the GUI hangs forever - we don't know yet what the limit 
-		//exactly is, but with 80 chars it works
 		StringBuffer limitedLengthStatus = new StringBuffer(status);
-		if(limitedLengthStatus.length() > 80)
-			limitedLengthStatus.setLength(80);
+		if(limitedLengthStatus.length() > 256)
+			limitedLengthStatus.setLength(256);
 		
 		ActivityObject object = service.getActivityFactory().object(
 				ActivityObject.COMMENT);
@@ -227,14 +224,18 @@ public class CommentPanel extends Composite {
 		entry.addVerb(service.getActivityFactory().verb(ActivityVerb.POST));
 		entry.addObject(object);
 		entry.setPublished(now);
+		entry.setParentId(parentActivity.getId());
+		entry.setParentJID(parentActivity.getActor().getUri());
 		
+		/*
 		String href = "xmpp:"+parentActivity.getActor().getUri()+
 			"?;node=urn:xmpp:microblog:0;item="+parentActivity.getId();
 		entry.addLink(service.getAtomFactory().link(href, "alternate", null, 
 				"text/html", 0));
 		entry.addRecipient(service.getAtomFactory().reply(parentActivity.getId(), href, 
 				null, null));
-
+		*/
+		
 		// add attachments if there are any
 		for (ActivityObject current : pictureAttachments) {
 			entry.addObject(current);
