@@ -102,6 +102,10 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private StyledFlowPanel statusActivity = new StyledFlowPanel("statusActivity");
 	
 	private StyledLabel author = new StyledLabel("link", "");
+	
+	protected final StyledFlowPanel replieswrapper = new StyledFlowPanel("author-wrapper");
+	private String recipientActivityID = null;
+	private boolean commentNotification = false;
 
 	public ActivityItemView(final ActivityEntry activity) {
 				
@@ -422,6 +426,14 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				inbox.updateActivityReplies(recipientActivityID);
 			}
 		}
+	}
+	
+	public void removeSelect() {
+		statusActivity.removeStyleName("selected");
+	}
+	
+	public void addSelect() {
+		statusActivity.addStyleName("selected");
 	}
 
 	private void select() {

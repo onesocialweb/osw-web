@@ -155,7 +155,7 @@ public class CommentPanel extends Composite {
 		statusPanel.add(flow);
 
 		// AttachmentsPanel
-		pictureAttachmentPanel = new PictureAttachmentPanel();
+		pictureAttachmentPanel = new SinglePictureAttachmentPanel();
 		pictureAttachmentPanel.setModel(pictureAttachments);
 		pictureAttachmentPanel.addComponentListener(componentListener);
 		attachmentsPanel.add(pictureAttachmentPanel);
@@ -295,7 +295,7 @@ public class CommentPanel extends Composite {
 	}
 
 
-	private PictureAttachmentPanel pictureAttachmentPanel;
+	private SinglePictureAttachmentPanel pictureAttachmentPanel;
 	//private PrivacyAttachmentPanel privacyAttachmentPanel;
 	private PictureChooserDialog pictureChooserDialog;
 

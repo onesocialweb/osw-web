@@ -44,7 +44,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 	// internationalization
 	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 	
-	private Stream<T> model;
+	protected Stream<T> model;
 
 	private DefaultTaskInfo task;
 
@@ -75,7 +75,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 
 	protected void repaint() {
 		clear();
-		List<T> items = model.getItems();
+		
 
 		if (model.isReady()) {
 			List<T> items = getModelItems();

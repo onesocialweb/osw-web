@@ -48,12 +48,15 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 	public void updateActivityReplies(String activityId) {
 		
 		WidgetCollection activityWidgets = getChildren();
+		
 		for(Widget widget: activityWidgets) {
 			if(widget instanceof ActivityItemView) {
 				ActivityItemView aiv = (ActivityItemView) widget;
+				
 				if(activityId.equals(aiv.getActivity().getId())) {
 					StyledFlowPanel replieswrapper = aiv.replieswrapper;
 					int repliesWidgetCount = replieswrapper.getWidgetCount();
+					
 					for(int i=0; i< repliesWidgetCount; i++) {
 						Widget w = replieswrapper.getWidget(i);
 						if(w instanceof CommentPanel) {
@@ -62,6 +65,7 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 							repliesPanel.setModel(OswServiceFactory.getService().getReplies(aiv.getActivity()));
 							repliesPanel.repaint();
 						} else if(w instanceof StyledLabel) {
+							
 							StyledLabel label = (StyledLabel) w;
 							if(label.isVisible())  {
 								String content = label.getHTML();
@@ -88,7 +92,14 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 	}
 	
 	@Override
-	protected Widget render(ActivityEntry activityEntry) {
+	protected Widget render(final ActivityEntry activityEntry) {
+		
+		if (activityEntry.getId()==null)
+			return null;
+
+		if (activityEntry.getActor()==null)
+			return null;
+
 		ActivityItemView sa = new ActivityItemView(activityEntry);
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
