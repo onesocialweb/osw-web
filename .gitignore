@@ -4,6 +4,9 @@
 war/OswClient
 war/OswClient.html
 war/WEB-INF/classes
+war/WEB-INF/lib
 war/WEB-INF/web.xml
 .DS_Store
 *.orig
+target
+semantic.cache
