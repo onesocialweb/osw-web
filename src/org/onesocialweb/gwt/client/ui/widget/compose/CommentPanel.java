@@ -19,16 +19,15 @@
 package org.onesocialweb.gwt.client.ui.widget.compose;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.handler.PictureHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
-import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.ui.dialog.PictureChooserDialog;
 import org.onesocialweb.gwt.client.ui.event.ComponentEvent;
 import org.onesocialweb.gwt.client.ui.event.ComponentHelper;
@@ -37,6 +36,7 @@ import org.onesocialweb.gwt.client.ui.widget.activity.RepliesPanel;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
+import org.onesocialweb.gwt.service.RosterItem.Presence;
 import org.onesocialweb.gwt.service.Stream;
 import org.onesocialweb.gwt.util.ListModel;
 import org.onesocialweb.model.acl.AclAction;
@@ -45,8 +45,8 @@ import org.onesocialweb.model.acl.AclSubject;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.activity.ActivityVerb;
-import org.onesocialweb.model.atom.AtomFactory;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -57,6 +57,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 
 public class CommentPanel extends Composite {
+	
+	// internationalization
+	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 
 	public static final String EVERYONE = "Everyone";
 
@@ -273,17 +276,22 @@ public class CommentPanel extends Composite {
 		// we got everything we need -> clean up UI
 		reset();
 
+		// Prepare a task to monitor status
+		final DefaultTaskInfo task = new DefaultTaskInfo(
+				uiText.PostingComment(), false);
+		TaskMonitor.getInstance().addTask(task);
+				
 		
 		service.post(entry, new RequestCallback<ActivityEntry>() {
 
 			@Override
 			public void onFailure() {
-			
+				task.complete(uiText.UpdateFailure(), Status.failure);
 			}
 
 			@Override
 			public void onSuccess(ActivityEntry result) {
-				
+				task.complete(uiText.UpdateSuccess(), Status.succes);
 			}
 
 		});

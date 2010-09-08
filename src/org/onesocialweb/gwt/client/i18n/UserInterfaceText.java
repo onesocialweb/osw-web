@@ -141,6 +141,7 @@ public interface UserInterfaceText extends Constants {
 	String FetchingActivities();
 	String NoActivitiesAvailable();
 	String UpdatingStatus();
+	String PostingComment();
 	String UpdateSuccess();
 	String WaitForUpload();
 	String FetchingFollowers();
