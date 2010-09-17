@@ -41,7 +41,6 @@ import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
-import org.onesocialweb.gwt.service.Stream;
 import org.onesocialweb.gwt.service.RosterItem.Presence;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.acl.AclAction;
@@ -106,10 +105,14 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	protected final StyledFlowPanel replieswrapper = new StyledFlowPanel("author-wrapper");
 	private String recipientActivityID = null;
 	private boolean commentNotification = false;
+	
+	private boolean expanded;
 
-	public ActivityItemView(final ActivityEntry activity) {
+	
+
+	public ActivityItemView(final ActivityEntry activity, boolean expand) {
 				
-		
+		this.expanded=expand;
 		this.activity = activity;
 		
 		// add the mouseOver handlers
@@ -247,12 +250,21 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			if(activity.hasReplies()) {
 				final StyledLabel repliesLabel = new StyledLabel("replies-link", "Comments: " +
 						activity.getRepliesLink().getCount());
+				
+				if (expand){
+					commentPanel.compose(activity);
+					replieswrapper.add(commentPanel);
+					repliesLabel.setVisible(false);
+				}
 
 				repliesLabel.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent event) {
 						commentPanel.compose(activity);
 						replieswrapper.add(commentPanel);
 						repliesLabel.setVisible(false);
+						AbstractActivityPanel parent =(AbstractActivityPanel) getParent();
+						parent.addExpanded(activity.getId());
+						//setExpanded(true);
 					}
 				});
 
@@ -264,7 +276,10 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 					public void onClick(ClickEvent event) {
 						commentPanel.compose(activity);
 						replieswrapper.add(commentPanel);
-						repliesLabel.setVisible(false);
+						repliesLabel.setVisible(false);							
+						AbstractActivityPanel parent =(AbstractActivityPanel) getParent();
+						parent.addExpanded(activity.getId());
+						//setExpanded(true);
 					}
 				});
 
@@ -457,6 +472,15 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 	private void showAttachments() {
 		// addPhotoAttachment("http://www.iwatchstuff.com/2008/05/30/emily-the-strange-movie.jpg");
+	}
+	
+	public boolean isExpanded() {
+		return expanded;
+	}
+
+
+	public void setExpanded(boolean expanded) {
+		this.expanded = expanded;
 	}
 
 	private void addPictureAttachment(ActivityObject object) {

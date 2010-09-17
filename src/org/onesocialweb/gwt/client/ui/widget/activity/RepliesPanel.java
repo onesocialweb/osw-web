@@ -62,12 +62,12 @@ public class RepliesPanel extends AbstractActivityPanel<ActivityEntry> {
 			items.removeAll(toBeRemoved);
 			for (ActivityEntry item : items) {
 			
-				Widget w = render(item);
+				Widget w = render(item, false);
 				if (w != null) {
 					if(getWidgetCount() == 0) {
-						insert(render(item), 0);
+						insert(render(item, false), 0);
 					} else {
-						insert(render(item), getWidgetCount());
+						insert(render(item, false), getWidgetCount());
 					}
 				}
 			}
@@ -76,7 +76,7 @@ public class RepliesPanel extends AbstractActivityPanel<ActivityEntry> {
 	
 
 	@Override
-	protected Widget render(ActivityEntry activityEntry) {
+	protected Widget render(ActivityEntry activityEntry, boolean expand) {
 		ActivityItemView sa = new ReplyItemView(activityEntry);
 		
 		sa.setButtonHandler(new ActivityButtonHandler() {

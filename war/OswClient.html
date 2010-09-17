@@ -7,7 +7,7 @@
 <title>OneSocialWeb</title>
 
 <link type="text/css" rel="stylesheet" href="standard.css">
-<link type="text/css" rel="stylesheet" href="themes/vfrnd/OswClient.css">
+<link type="text/css" rel="stylesheet" href="themes/osw/OswClient.css">
 
 </head>
 
@@ -27,7 +27,7 @@
   		var preferences = {
 
 			// It is easy to change the styling of this client, just point this variable to another theme folder  		  		
-		  	theme_folder: "themes/vfrnd/",
+		  	theme_folder: "themes/osw/",
 
 		  	// What name to use when presenting this service to the user
 		  	service_name: "Onesocialweb",
@@ -47,7 +47,14 @@
 		  	file_retrieval_endpoint: "http://osw.vodafonernd.com/file",
 
 		  	// If true, we may do a bit more of logging
-			developer_mode: "true"
+			developer_mode: "true",
+			
+			
+			// If true, allows registration on this server
+			registration_allowed: "true",
+
+			// If true, allows registration on this server only via a registration code
+			registration_code: "true"
 		};
 	</script>
 

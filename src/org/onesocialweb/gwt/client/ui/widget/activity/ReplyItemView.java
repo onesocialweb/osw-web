@@ -25,7 +25,7 @@ public class ReplyItemView extends ActivityItemView {
 
 
 	public ReplyItemView(ActivityEntry activity) {
-		super(activity);
+		super(activity, false);
 		
 		//prevent users to post comments
 		replieswrapper.clear();

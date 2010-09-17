@@ -298,7 +298,7 @@ public class CommentPanel extends Composite {
 		
 		
 		replies.setModel(service.getReplies(parentActivity));
-		replies.repaint();
+		replies.repaint();		
 		buttonUpdate.setEnabled(true);
 
 	}

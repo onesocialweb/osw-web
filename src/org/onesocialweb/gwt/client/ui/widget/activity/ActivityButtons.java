@@ -121,7 +121,7 @@ public class ActivityButtons extends FlowPanel {
 						public void onSuccess(Object result) {
 							task.complete("", Status.succes);
 							enable();
-							panel.repaint();
+							//panel.repaint();
 							setVisible(false);
 						}
 					});
