@@ -75,7 +75,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	
 	private HTML statusLabel = new HTML();
 	private HTML infoLabel = new HTML();
-	private final RepliesPanel repliesPanel = new RepliesPanel();
+	//private final RepliesPanel repliesPanel = new RepliesPanel();
 	private final CommentPanel commentPanel = new CommentPanel();
 
 	private StyledTooltipImage avatarImage = new StyledTooltipImage("", "link",

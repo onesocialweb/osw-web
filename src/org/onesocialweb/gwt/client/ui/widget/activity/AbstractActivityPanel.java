@@ -131,7 +131,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 		int index=getIndex(item);
 		remove(index);
 		ActivityEntry entry = (ActivityEntry) item;
-		ActivityItemView previous = (ActivityItemView) this.getWidget(index);
+	//	ActivityItemView previous = (ActivityItemView) this.getWidget(index);
 		Widget w;
 		if (expandedItems.contains(entry.getId()))
 			 w= render(item, true);	

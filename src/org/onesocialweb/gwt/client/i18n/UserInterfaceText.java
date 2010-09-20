@@ -143,6 +143,7 @@ public interface UserInterfaceText extends Constants {
 	String UpdatingStatus();
 	String PostingComment();
 	String UpdateSuccess();
+	String CommentSuccess();
 	String WaitForUpload();
 	String FetchingFollowers();
 	String FetchingFollowing();
@@ -154,6 +155,7 @@ public interface UserInterfaceText extends Constants {
 	String FailedToGetProfile();
 	String LoginFailure();
 	String UpdateFailure();
+	String CommentFailure();
 	
 	// Months
 	String January();

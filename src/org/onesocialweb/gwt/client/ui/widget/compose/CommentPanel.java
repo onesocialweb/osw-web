@@ -142,9 +142,10 @@ public class CommentPanel extends Composite {
 			}
 		});
 
-		Stream<ActivityEntry> repliesModel = OswServiceFactory.getService().getReplies(
-				parentActivity);
+		//here...
+		Stream<ActivityEntry> repliesModel = OswServiceFactory.getService().getReplies(parentActivity);
 		replies.setModel(repliesModel);
+				
 		
 		// Add components to page
 		flow.add(addPhoto);
@@ -286,12 +287,12 @@ public class CommentPanel extends Composite {
 
 			@Override
 			public void onFailure() {
-				task.complete(uiText.UpdateFailure(), Status.failure);
+				task.complete(uiText.CommentFailure(), Status.failure);
 			}
 
 			@Override
 			public void onSuccess(ActivityEntry result) {
-				task.complete(uiText.UpdateSuccess(), Status.succes);
+				task.complete(uiText.CommentSuccess(), Status.succes);
 			}
 
 		});
