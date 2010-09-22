@@ -35,6 +35,8 @@ import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
 import org.onesocialweb.gwt.service.Stream;
 import org.onesocialweb.gwt.service.StreamEvent;
 import org.onesocialweb.gwt.service.StreamEvent.Type;
+import org.onesocialweb.gwt.service.imp.GwtInbox.InboxEvent;
+import org.onesocialweb.gwt.service.imp.GwtReplies;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.activity.ActivityEntry;
 
@@ -49,7 +51,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 	
 	List<String> expandedItems= new ArrayList<String>();
 	
-	protected Stream<T> model;
+	protected Stream<T> model; // reference to the GwtInbox - the observable model
 
 	private DefaultTaskInfo task;
 
@@ -116,7 +118,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 		remove(msg);
 		Widget w = render(item, false);
 		if (w != null) {
-			insert(render(item, false), 0);
+			insert(w, 0);
 		}
 	}
 	
@@ -126,18 +128,25 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 		remove(index);
 	}
 	
-	private void commentItem(T item){
+	private void commentItem(T item, T comment){
 	
 		int index=getIndex(item);
-		remove(index);
+		Widget previousWidget = this.getWidget(index);
+		ActivityItemView oldAiv= (ActivityItemView) previousWidget;
+		
+		GwtReplies model = (GwtReplies)oldAiv.getCommentPanel().getReplies().getModel();
+						
 		ActivityEntry entry = (ActivityEntry) item;
-	//	ActivityItemView previous = (ActivityItemView) this.getWidget(index);
-		Widget w;
-		if (expandedItems.contains(entry.getId()))
-			 w= render(item, true);	
-		else 
-			 w= render(item, false);			
-		insert(w, index);
+		if (expandedItems.contains(entry.getId())){			
+			model.addItem((ActivityEntry)comment);
+		}
+		else{ 
+			remove(index);
+			Widget w= render(item, false);	
+			insert(w, index);
+		}		
+		
+		
 	}
 	
 	private int getIndex(T item){
@@ -156,19 +165,23 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 	}
 	
 
+	
+
 	private class StreamListener implements Observer<StreamEvent<T>> {
 
 		@Override
 		public void handleEvent(StreamEvent<T> event) {
 			/*if (update) { */
-				if (event.getType().equals(Type.added)) {
+				if ((event instanceof InboxEvent) && (event.getType().equals(Type.added))) {
 					for (T item : event.getItems()) {
-						showItem(item);
+						showItem(item);						
 					}
-				}else if (event.getType().equals(Type.replied)) {
-					for (T item : event.getItems()) {
-						commentItem(item);
-					}
+				} 		
+				else if (event.getType().equals(Type.replied)) {
+						T item =event.getItems().get(0);
+						T comment = event.getItems().get(1);
+						commentItem(item, comment);
+					
 				}else if (event.getType().equals(Type.removed)){
 					for (T item : event.getItems()) {
 						removeItem(item);

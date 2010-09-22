@@ -36,8 +36,8 @@ import org.onesocialweb.gwt.client.ui.widget.activity.RepliesPanel;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
-import org.onesocialweb.gwt.service.RosterItem.Presence;
 import org.onesocialweb.gwt.service.Stream;
+import org.onesocialweb.gwt.service.imp.GwtReplies;
 import org.onesocialweb.gwt.util.ListModel;
 import org.onesocialweb.model.acl.AclAction;
 import org.onesocialweb.model.acl.AclRule;
@@ -78,7 +78,7 @@ public class CommentPanel extends Composite {
 		composePanel();
 	}
 	
-	public RepliesPanel getReplies() {
+	public RepliesPanel<ActivityEntry> getReplies() {
 		return replies;
 	}
 	
@@ -142,9 +142,14 @@ public class CommentPanel extends Composite {
 			}
 		});
 
-		//here...
-		Stream<ActivityEntry> repliesModel = OswServiceFactory.getService().getReplies(parentActivity);
-		replies.setModel(repliesModel);
+		if ( parentActivity.hasReplies()){
+			if  ((replies.getModel() == null ) || (replies.getModel().getItems().size()==0)) {
+				Stream<ActivityEntry> repliesModel = OswServiceFactory.getService().getReplies(parentActivity);
+				replies.setModel(repliesModel);
+			}
+		} else {
+			replies.setModel(new GwtReplies(parentActivity.getId(), parentActivity.getActor().getUri()));
+		}
 				
 		
 		// Add components to page
@@ -297,9 +302,10 @@ public class CommentPanel extends Composite {
 
 		});
 		
-		
+		/*
 		replies.setModel(service.getReplies(parentActivity));
 		replies.repaint();		
+		*/
 		buttonUpdate.setEnabled(true);
 
 	}
@@ -312,7 +318,7 @@ public class CommentPanel extends Composite {
 	private final FlowPanel statusPanel = new FlowPanel();
 	private final FlowPanel attachmentsPanel = new FlowPanel();
 	private final FlowPanel flow = new FlowPanel();
-	private final RepliesPanel replies = new RepliesPanel();
+	private /*final*/ RepliesPanel<ActivityEntry> replies = new RepliesPanel<ActivityEntry>();
 	
 	private final Label attachment = new Label("Add:");
 	private final Button buttonUpdate = new Button("Post your comment");

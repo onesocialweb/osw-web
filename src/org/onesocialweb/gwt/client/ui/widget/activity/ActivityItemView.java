@@ -65,8 +65,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * @author dcheng
+ *
+ */
 public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
 	
@@ -76,7 +79,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private HTML statusLabel = new HTML();
 	private HTML infoLabel = new HTML();
 	//private final RepliesPanel repliesPanel = new RepliesPanel();
-	private final CommentPanel commentPanel = new CommentPanel();
+	private /*final*/ CommentPanel commentPanel = new CommentPanel();
+
+	
 
 	private StyledTooltipImage avatarImage = new StyledTooltipImage("", "link",
 			uiText.ViewProfile());
@@ -96,11 +101,11 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 	private ActivityButtonHandler handler;
 	private final ActivityEntry activity;
-	private boolean isUpdating = false;
+//	private boolean isUpdating = false;
 	
 	private StyledFlowPanel statusActivity = new StyledFlowPanel("statusActivity");
 	
-	private StyledLabel author = new StyledLabel("link", "");
+//	private StyledLabel author = new StyledLabel("link", "");
 	
 	protected final StyledFlowPanel replieswrapper = new StyledFlowPanel("author-wrapper");
 	private String recipientActivityID = null;
@@ -108,7 +113,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	
 	private boolean expanded;
 
-	
+	public CommentPanel getCommentPanel() {
+		return commentPanel;
+	}
 
 	public ActivityItemView(final ActivityEntry activity, boolean expand) {
 				
@@ -434,13 +441,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	protected void onLoad() {
 		super.onLoad();
 
-		if(commentNotification) {
+	/*	if(commentNotification) {
 			Widget parent = getParent();
 			if(parent instanceof InboxPanel) {
 				InboxPanel inbox = (InboxPanel) parent;
 				inbox.updateActivityReplies(recipientActivityID);
 			}
-		}
+		} */
 	}
 	
 	public void removeSelect() {
@@ -667,5 +674,10 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 
 	}
+	
+	
+
+	
+	
 
 }

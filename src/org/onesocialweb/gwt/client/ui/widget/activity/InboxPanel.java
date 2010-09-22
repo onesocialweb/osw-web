@@ -20,15 +20,10 @@
 package org.onesocialweb.gwt.client.ui.widget.activity;
 
 import org.onesocialweb.gwt.client.handler.ActivityButtonHandler;
-import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
-import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
-import org.onesocialweb.gwt.client.ui.widget.compose.CommentPanel;
 import org.onesocialweb.gwt.service.OswServiceFactory;
-import org.onesocialweb.gwt.service.Stream;
 import org.onesocialweb.model.activity.ActivityEntry;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.WidgetCollection;
 
 public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 	
@@ -45,51 +40,6 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 		buttons.setVisible(false);
 	}
 
-	public void updateActivityReplies(String activityId) {
-		
-		WidgetCollection activityWidgets = getChildren();
-		
-		for(Widget widget: activityWidgets) {
-			if(widget instanceof ActivityItemView) {
-				ActivityItemView aiv = (ActivityItemView) widget;
-				
-				if(activityId.equals(aiv.getActivity().getId())) {
-					StyledFlowPanel replieswrapper = aiv.replieswrapper;
-					int repliesWidgetCount = replieswrapper.getWidgetCount();
-					
-					for(int i=0; i< repliesWidgetCount; i++) {
-						Widget w = replieswrapper.getWidget(i);
-						if(w instanceof CommentPanel) {
-							CommentPanel commentPanel = (CommentPanel) w;
-							RepliesPanel repliesPanel = commentPanel.getReplies();
-							repliesPanel.setModel(OswServiceFactory.getService().getReplies(aiv.getActivity()));
-							repliesPanel.repaint();
-						} else if(w instanceof StyledLabel) {
-							
-							StyledLabel label = (StyledLabel) w;
-							if(label.isVisible())  {
-								String content = label.getHTML();
-								if("Add a comment".equals(content)) {
-									label.setHTML("Comments: 1");
-								} else {
-									content = content.substring(content.indexOf(":")+2);
-									try {
-										int numReplies = Integer.parseInt(content) + 1;
-										label.setHTML("Comments: " + numReplies);
-									} catch(NumberFormatException e) {
-										//never mind...simply do not change the number of comments in the GUI
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		
-		
-	}
 	
 	@Override
 	protected Widget render(final ActivityEntry activityEntry, boolean expand) {

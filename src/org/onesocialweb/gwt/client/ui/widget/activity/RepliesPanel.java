@@ -16,115 +16,137 @@
  *  author luca faggioli luca(dot)faggioli(at)openliven(dot)com
  *  
  */
+
 package org.onesocialweb.gwt.client.ui.widget.activity;
 
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.onesocialweb.gwt.client.handler.ActivityButtonHandler;
+import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
+import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
+import org.onesocialweb.gwt.client.task.TaskInfo.Status;
 import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
 import org.onesocialweb.gwt.service.Stream;
+import org.onesocialweb.gwt.service.StreamEvent;
+import org.onesocialweb.gwt.service.StreamEvent.Type;
+import org.onesocialweb.gwt.service.imp.GwtReplies.RepliesEvent;
+import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.activity.ActivityEntry;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.WidgetCollection;
 
-public class RepliesPanel extends AbstractActivityPanel<ActivityEntry> {
+public class RepliesPanel<T> extends FlowPanel {
 
-	//private final ActivityButtons buttons = new ActivityButtons();
-
-	//private ActivityItemView lastSelected;
-
-	public RepliesPanel() {		
-	}
-	
-	public void addNewReplies() {
 		
-		if(model.isReady()) {
-			List<ActivityEntry> items = getModelItems();
-			List<ActivityEntry> toBeRemoved = new ArrayList<ActivityEntry>();
-			for (ActivityEntry item : items) {
-				WidgetCollection children = this.getChildren();
-				if(children.size() == 0)
-					break;
-				Iterator it = children.iterator();
-				while(it.hasNext()) {
-					ReplyItemView riv = (ReplyItemView) it.next();
-					if(riv.getActivity().getId().equals(item.getId())) {
-						toBeRemoved.add(item);
-						break;
-					}
-				}
-			}
-			items.removeAll(toBeRemoved);
-			for (ActivityEntry item : items) {
+		// internationalization
+		private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);				
+		
+		private Stream<T> model; // reference to the GwtReplies - the observable model	
+
+		private DefaultTaskInfo task;
+
+		private boolean update = true;
+		
+		private StyledLabel msg = new StyledLabel("message",
+				uiText.NoActivitiesAvailable());
+		
+		public Stream<T> getModel() {
+			return model;
+		}
+		
+		public void setModel(Stream<T> model) {
+			this.model = model;
+			// Add a listener on the replies model
+			this.model.registerEventHandler(new StreamListener());
+			// Repaint a first time
+			repaint();
+		}
+		
 			
-				Widget w = render(item, false);
-				if (w != null) {
-					if(getWidgetCount() == 0) {
-						insert(render(item, false), 0);
-					} else {
-						insert(render(item, false), getWidgetCount());
+		
+		public boolean isUpdating() {
+			return update;
+		}
+		
+		public void setUpdating(boolean shouldUpdate) {
+			update = shouldUpdate;
+		}
+		
+		
+		
+		private Widget render(ActivityEntry activityEntry) {				
+				
+			
+			ReplyItemView sa = new ReplyItemView(activityEntry);
+				sa.setButtonHandler(new ActivityButtonHandler() {
+					public void handleShow(int top, ActivityItemView sa) {
 					}
+
+					public void handleHide() {
+					}
+				});				
+				return sa;
+		}		
+		
+
+		protected void repaint() {
+			
+			//addNewReplies();
+			clear();
+			
+			if (model.isReady()) {
+				List<T> items = getModelItems();
+				if (items.size() > 0) {
+					// render the items
+					for (int i = items.size(); i >0 ; i--) {
+						T item = items.get(i-1);
+						showReply(item);
+					}
+				} 
+				if (task != null) {
+					task.complete("", Status.succes);
+				}
+
+			} else {
+				if (task == null) {
+				//	task = new DefaultTaskInfo(uiText.FetchingActivities(), false);
+				//	TaskMonitor.getInstance().addTask(task);
 				}
 			}
-		}
-	}
-	
-
-	@Override
-	protected Widget render(ActivityEntry activityEntry, boolean expand) {
-		ActivityItemView sa = new ReplyItemView(activityEntry);
-		
-		sa.setButtonHandler(new ActivityButtonHandler() {
-			public void handleShow(int top, ActivityItemView sa) {
-			}
-
-			public void handleHide() {
-			}
-		});
-		
-		return sa;
-	}
-
-	@Override
-	public void repaint() {
-		addNewReplies();
-	}
-	
-	
-	@Override
-	protected void addEmptyModelMessage() {
-		//do nothing: we show nothing when the 
-		//are no replies for the given activity
-	}
-	
-	@Override
-	protected List<ActivityEntry> getModelItems() {
-		
-		List<ActivityEntry> items = model.getItems();
-		Collections.sort(items, new ActivityComparator());
-		return items;
-		
-	}
-	
-	private class ActivityComparator implements Comparator<ActivityEntry> {
-
-		/*
-		 * Compares activities based on the publishing date
-		 * (non-Javadoc)
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public int compare(ActivityEntry activity1, ActivityEntry activity2) {
-			return activity1.getPublished().compareTo(activity2.getPublished());
+			
 		}
 
-	}
+		private void showReply(T item) {
+			remove(msg);
+			Widget w =  render((ActivityEntry)item);
+			int index= getWidgetCount();
+			if (w != null) {
+				insert(w, index);				
+			}
+		}
+		
+
+		private class StreamListener implements Observer<StreamEvent<T>> {
+
+			@Override
+			public void handleEvent(StreamEvent<T> event) {
+					if ((event instanceof RepliesEvent) && (event.getType().equals(Type.added))) {
+						for (T item : event.getItems()) {
+							showReply(item);						
+						}																							
+					}				
+					else {
+						repaint();
+					}			
+			}
+
+		}
+		
+		protected List<T> getModelItems() {
+			return model.getItems();
+		}
 	
-	//private Stream<ActivityEntry> oldModel;
-	
+
 }
