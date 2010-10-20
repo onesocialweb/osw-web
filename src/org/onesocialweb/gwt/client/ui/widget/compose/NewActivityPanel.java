@@ -158,8 +158,7 @@ public class NewActivityPanel extends Composite {
 		reset();
 
 		// Prepare a task to monitor status
-		final DefaultTaskInfo task = new DefaultTaskInfo(
-				uiText.UpdatingStatus(), false);
+		final DefaultTaskInfo task = new DefaultTaskInfo(uiText.UpdatingStatus(), false);
 		TaskMonitor.getInstance().addTask(task);
 		service.post(entry, new RequestCallback<ActivityEntry>() {
 

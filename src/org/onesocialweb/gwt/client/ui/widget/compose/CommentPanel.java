@@ -42,9 +42,11 @@ import org.onesocialweb.gwt.util.ListModel;
 import org.onesocialweb.model.acl.AclAction;
 import org.onesocialweb.model.acl.AclRule;
 import org.onesocialweb.model.acl.AclSubject;
+import org.onesocialweb.model.activity.ActivityActor;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.activity.ActivityVerb;
+import org.onesocialweb.model.vcard4.Profile;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -68,6 +70,8 @@ public class CommentPanel extends Composite {
 	private final ComponentHelper componentHelper = new ComponentHelper();
 
 	private final InternalComponentListener componentListener = new InternalComponentListener();
+	
+	ActivityActor actor=null;
 
 	public CommentPanel() {
 	}
@@ -221,10 +225,8 @@ public class CommentPanel extends Composite {
 		if(limitedLengthStatus.length() > 256)
 			limitedLengthStatus.setLength(256);
 		
-		ActivityObject object = service.getActivityFactory().object(
-				ActivityObject.COMMENT);
-		object.addContent(service.getAtomFactory().content(limitedLengthStatus.toString(),
-				"text/plain", null));
+		ActivityObject object = service.getActivityFactory().object(ActivityObject.COMMENT);
+		object.addContent(service.getAtomFactory().content(limitedLengthStatus.toString(),"text/plain", null));
 		object.setPublished(now);
 
 		// the basics
@@ -236,39 +238,12 @@ public class CommentPanel extends Composite {
 		entry.setParentId(parentActivity.getId());
 		entry.setParentJID(parentActivity.getActor().getUri());
 		
-		/*
-		String href = "xmpp:"+parentActivity.getActor().getUri()+
-			"?;node=urn:xmpp:microblog:0;item="+parentActivity.getId();
-		entry.addLink(service.getAtomFactory().link(href, "alternate", null, 
-				"text/html", 0));
-		entry.addRecipient(service.getAtomFactory().reply(parentActivity.getId(), href, 
-				null, null));
-		*/
 		
 		// add attachments if there are any
 		for (ActivityObject current : pictureAttachments) {
 			entry.addObject(current);
 		}
-		
-		
-		/*
-		// setup access control
-		AclRule rule = service.getAclFactory().aclRule();
-		rule.addAction(service.getAclFactory().aclAction(AclAction.ACTION_VIEW,
-				AclAction.PERMISSION_GRANT));
-
-		// check privacy settings
-		String visibilityValue = privacyAttachmentPanel.getPrivacyValue();
-
-		if (visibilityValue.equals(EVERYONE)) {
-			rule.addSubject(service.getAclFactory().aclSubject(null,
-					AclSubject.EVERYONE));
-		} else {
-			rule.addSubject(service.getAclFactory().aclSubject(visibilityValue,
-					AclSubject.GROUP));
-		}
-		entry.addAclRule(rule);
-		*/
+					
 		
 		//TODO: we build the default ACL for now, but we need to fix this since 
 		//comments cannot always be visible to Everyone
@@ -301,11 +276,34 @@ public class CommentPanel extends Composite {
 			}
 
 		});
+		actor = service.getActivityFactory().actor();		
+		actor.setUri(service.getUserBareJID());
 		
-		/*
-		replies.setModel(service.getReplies(parentActivity));
-		replies.repaint();		
-		*/
+		entry.setActor(actor);			
+		
+		GwtReplies model = (GwtReplies)this.getReplies().getModel();
+		service.getProfile(service.getUserBareJID(),
+				new RequestCallback<Profile>() {
+
+					@Override
+					public void onFailure() {
+						// do nothing
+					}
+
+					@Override
+					public void onSuccess(Profile result) {
+						// show display name
+						final String fullName = result.getFullName();
+						if (fullName != null && fullName.length() > 0) {
+							actor.setName(fullName);
+						}
+
+					}
+
+				});
+
+		model.addItem(entry);
+		setLocalComment(true);
 		buttonUpdate.setEnabled(true);
 
 	}
@@ -323,6 +321,17 @@ public class CommentPanel extends Composite {
 	private final Label attachment = new Label("Add:");
 	private final Button buttonUpdate = new Button("Post your comment");
 	private final TextareaUpdate textareaUpdate = new TextareaUpdate();
+	private boolean localComment = false;
+
+	public boolean isLocalComment() {
+		return localComment;
+	}
+
+
+	public void setLocalComment(boolean localComment) {
+		this.localComment = localComment;
+	}
+
 
 	/*
 	private final PushButton addPrivacy = new PushButton(new Image(OswClient
