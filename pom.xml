@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.onesocialweb</groupId>
+    <artifactId>osw-web</artifactId>
+    <version>0.7-SNAPSHOT</version>
+    <name>osw-web</name>
+    <packaging>war</packaging>
+
+    <description>Common data model, XML parsers/writers and other interfaces</description>
+    <url>http://onesocialweb.org/</url>
+
+    <mailingLists>
+        <mailingList>
+            <name>One Social Web mailing list</name>
+            <post>onesocialweb@googlegroups.com</post>
+            <archive>http://groups.google.com/group/onesocialweb</archive>
+        </mailingList>
+    </mailingLists>
+
+    <properties>
+        <gwt.version>2.0.4</gwt.version>
+        <gwt.maven>1.3-SNAPSHOT</gwt.maven>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <formats>
+                        <format>html</format>
+                        <format>xml</format>
+                    </formats>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <targetJdk>1.6</targetJdk>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.7</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <build>
+        <outputDirectory>war/WEB-INF/classes</outputDirectory>
+
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+        </resources>
+        <plugins>           
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwt.maven}</version>
+                <configuration>
+                    <inplace>true</inplace>
+                    <logLevel>TRACE</logLevel>
+                    <runTarget>OswClient.html</runTarget>
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <extraJvmArgs>-Xmx320m -DDEBUG</extraJvmArgs>
+                    <servicePattern>**/gwt/**/*Service.java</servicePattern>
+                    <soyc>false</soyc>
+                    <style>OBF</style>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>clean</goal>
+                            <goal>resources</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1-beta-1</version>
+                <configuration>
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <webappDirectory>war</webappDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>clean.war</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <tasks>
+                                <!-- The gwt-maven-plugin use the war source folder
+                                    as it's build directory. We need to cleanup after we'd run the plugin and
+                                    remove all GWT related artifacts that are required to run the hosted mode. -->
+                                <delete dir="war/WEB-INF/classes" />
+                                <delete dir="war/WEB-INF/lib" />
+                                <delete dir="war/META-INF" />                                
+                                <delete dir="war/OswClient" />
+                                <delete dir="war/org.appfuse.client.Appfuse"/>
+                                <delete dir="target" />                               
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+            <version>${gwt.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.onesocialweb</groupId>
+            <artifactId>osw-model</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.onesocialweb</groupId>
+            <artifactId>osw-lib-gwt</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.onesocialweb</groupId>
+            <artifactId>osw-lib-java</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.calclab</groupId>
+            <artifactId>suco</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gwt-mobile-webkit</groupId>
+            <artifactId>gwt-html5-storage</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.reveregroup.gwt</groupId>
+            <artifactId>gwt-image-loader</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.maydu.gwt</groupId>
+            <artifactId>gwt-vl</artifactId>
+            <version>0.9a</version>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>gwt-mobile-webkit</id>
+            <url>http://gwt-mobile-webkit.googlecode.com/svn/repo</url>
+        </repository>
+        <repository>
+            <id>gwt-maven</id>
+            <url>http://gwt-vl.sourceforge.net/maven</url>
+        </repository>
+        <repository>
+            <id>lib-repo</id>
+            <url>http://svn.apache.org/repos/asf/james/hupa/lib</url>
+        </repository>
+
+        <repository>
+            <id>osw-repo</id>
+            <name>osw-repo-google</name>
+            <url>http://osw-repo.googlecode.com/svn/trunk/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+      <pluginRepository>
+        <id>codehaus</id>
+        <url>http://nexus.codehaus.org/snapshots</url>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+      </pluginRepository>
+    </pluginRepositories>
+       
+</project>
