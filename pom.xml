@@ -217,9 +217,9 @@
         </repository>
 
         <repository>
-            <id>osw-repo</id>
-            <name>osw-repo-google</name>
-            <url>http://osw-repo.googlecode.com/svn/trunk/</url>
+            <id>vodafonernd.com</id>
+            <name>vodafonernd.com-releases</name>
+            <url>http://vodafonernd.com/artifactory/libs-releases-local</url>
         </repository>
     </repositories>
 
