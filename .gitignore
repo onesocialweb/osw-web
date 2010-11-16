@@ -5,5 +5,7 @@ war/OswClient
 war/OswClient.html
 war/WEB-INF/classes
 war/WEB-INF/web.xml
+war/org.appfuse.client.Appfuse/
+/target/
 .DS_Store
 *.orig
