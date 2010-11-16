@@ -15,6 +15,7 @@
   <!-- <extend-property name="locale" values="en"/> -->
   <extend-property name="locale" values="nl"/> 
   <extend-property name="locale" values="fr"/> 
+  <extend-property name="locale" values="it" />
 
   <inherits name="com.allen_sauer.gwt.log.gwt-log" />
   
