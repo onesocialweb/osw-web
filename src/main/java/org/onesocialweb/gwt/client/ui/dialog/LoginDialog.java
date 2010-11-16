@@ -25,6 +25,8 @@ import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.ErrorLabel;
 import org.onesocialweb.gwt.client.ui.widget.FieldLabel;
 import org.onesocialweb.gwt.client.validation.CustomLabelTextAction;
+import org.onesocialweb.gwt.model.GwtFormField;
+import org.onesocialweb.gwt.service.GwtDataForm;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 
@@ -126,10 +128,10 @@ public class LoginDialog extends AbstractDialog {
 		FieldLabel passwordRegister = new FieldLabel(uiText.ChoosePassword());
 		FieldLabel emailRegister = new FieldLabel(uiText.EnterYourEmail());
 		FieldLabel codeRegister = new FieldLabel(uiText.EnterCode());
-		TextBox usernameTextRegister = new TextBox();
-		PasswordTextBox passwordTextRegister = new PasswordTextBox();
-		TextBox emailTextRegister = new TextBox();
-		TextBox codeTextRegister = new TextBox();
+		final TextBox usernameTextRegister = new TextBox();
+		final PasswordTextBox passwordTextRegister = new PasswordTextBox();
+		final TextBox emailTextRegister = new TextBox();
+		final TextBox codeTextRegister = new TextBox();
 		ErrorLabel usernameRegisterError = new ErrorLabel();
 		ErrorLabel passwordRegisterError = new ErrorLabel();
 		ErrorLabel emailRegisterError = new ErrorLabel();
@@ -226,15 +228,53 @@ public class LoginDialog extends AbstractDialog {
 		});
 
 		buttonRegister.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-
-				// TODO add code for registration
+			public void onClick(ClickEvent event) {			
 
 				boolean success = validator.validate();
+				
+				GwtDataForm form = new GwtDataForm();
+				
+				GwtFormField field = new GwtFormField("username");								
+				field.addValue(usernameTextRegister.getText());
+				form.addField(field);
+				
+				field = new GwtFormField("password");		
+				field.addValue(passwordTextRegister.getText());
+				form.addField(field);
+				
+				
+				field = new GwtFormField("email");		
+				field.addValue(emailTextRegister.getText());
+				form.addField(field);
+				
+				field = new GwtFormField("code");		
+				field.addValue(codeTextRegister.getText());
+				form.addField(field);
 
 				if (success) {
 					// No validation errors found. We can submit the data to the
 					// server!
+					
+					OswServiceFactory.getService().register(form, new RequestCallback<Object>() {
+
+								@Override
+								public void onFailure() {
+									AlertDialog.getInstance().showDialog(
+											"Username exists or code was invalid.",
+											"Registration Failed!");
+								}
+
+								@Override
+								public void onSuccess(Object result) {
+
+									//say success and change to login tab...
+									AlertDialog.getInstance().showDialog(
+											"Please proceed to login",
+											"Succesful Registration!");
+									tabpanel.selectTab(0);
+								}								
+							});
+					
 				} else {
 					// One (or more) validations failed. The actions will have
 					// been
