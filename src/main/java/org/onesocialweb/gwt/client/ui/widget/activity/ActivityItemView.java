@@ -261,9 +261,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 		if(!commentNotification) {
 			if(activity.hasReplies()) {
-				final StyledLabel repliesLabel = new StyledLabel("replies-link", "Comments: " +
+				final StyledLabel repliesLabel = new StyledLabel("replies-link", uiText.Comments() + ": " +
 						activity.getRepliesLink().getCount());
-				final StyledLabel notificationsLabel = new StyledLabel("replies-link", "Unread Comments: "+ unread); 
+				final StyledLabel notificationsLabel = new StyledLabel("replies-link", uiText.UnreadComments() + ": "+ unread); 
 				
 				if (expand){
 					commentPanel.compose(activity);

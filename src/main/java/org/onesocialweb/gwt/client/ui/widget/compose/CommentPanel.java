@@ -185,7 +185,7 @@ public class CommentPanel extends Composite {
 		statusPanel.setStyleName("topPanel");
 
 		// Set tooltips
-		addPhoto.setTitle("Add picture");
+		addPhoto.setTitle(uiText.AddPicture());
 		//addPrivacy.setTitle("Change privacy (default: Everyone)");
 		
 		initWidget(statusPanel);

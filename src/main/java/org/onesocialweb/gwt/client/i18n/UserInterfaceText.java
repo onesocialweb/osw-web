@@ -44,6 +44,7 @@ public interface UserInterfaceText extends Constants {
 	String ProfileAndContact();
 	String Account();
 	String Add();
+	String PostComment();
 
 	// Labels
 	String YourUsername();
@@ -82,6 +83,8 @@ public interface UserInterfaceText extends Constants {
 	String Pictures();
 	String To();
 	String VisibleTo();
+	String Comments();
+	String UnreadComments();
 	
 	// Application / window names
 	String Activities();
@@ -150,12 +153,16 @@ public interface UserInterfaceText extends Constants {
 	String NoFollowers();
 	String NoFollowing();
 	String EmptyUpdate();
+	String RegistrationSuccess();
+	String PleaseLogin();
 	
 	// Error 
 	String FailedToGetProfile();
 	String LoginFailure();
 	String UpdateFailure();
 	String CommentFailure();
+	String RegistrationFailure();
+	String RegistrationFailureDetails();
 	
 	// Months
 	String January();

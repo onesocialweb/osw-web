@@ -260,8 +260,8 @@ public class LoginDialog extends AbstractDialog {
 								@Override
 								public void onFailure() {
 									AlertDialog.getInstance().showDialog(
-											"Username exists or code was invalid.",
-											"Registration Failed!");
+											uiText.RegistrationFailureDetails(),
+											uiText.RegistrationFailure());
 								}
 
 								@Override
@@ -269,8 +269,8 @@ public class LoginDialog extends AbstractDialog {
 
 									//say success and change to login tab...
 									AlertDialog.getInstance().showDialog(
-											"Please proceed to login",
-											"Succesful Registration!");
+											uiText.PleaseLogin(),
+											uiText.RegistrationSuccess());
 									tabpanel.selectTab(0);
 								}								
 							});
