@@ -41,8 +41,8 @@ public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 	}
 
 	@Override
-	protected Widget render(final ActivityEntry activityEntry, boolean expand) {
-		ActivityItemView sa = new ActivityItemView(activityEntry, expand);
+	protected Widget render(final ActivityEntry activityEntry, boolean expand, int unread) {
+		ActivityItemView sa = new ActivityItemView(activityEntry, expand, unread);
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
 				

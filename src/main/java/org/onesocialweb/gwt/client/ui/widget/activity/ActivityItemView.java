@@ -65,11 +65,8 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
-/**
- * @author dcheng
- *
- */
 public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
 	
@@ -98,6 +95,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-notavailable.png", "available",
 			"Visual indicator of user online presence");
+	private StyledTooltipImage commentIcon = new StyledTooltipImage(OswClient
+			.getInstance().getPreference("theme_folder")
+			+ "assets/i-comment.png", "icon", "");
 
 	private ActivityButtonHandler handler;
 	private final ActivityEntry activity;
@@ -107,7 +107,10 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	
 //	private StyledLabel author = new StyledLabel("link", "");
 	
-	protected final StyledFlowPanel replieswrapper = new StyledFlowPanel("author-wrapper");
+	protected final VerticalPanel vpanel = new VerticalPanel();
+	protected final HorizontalPanel replieswrapper = new HorizontalPanel();	
+	protected final StyledFlowPanel commentswrapper =  new StyledFlowPanel("author-wrapper");
+	protected final StyledFlowPanel unreadwrapper =  new StyledFlowPanel("author-wrapper");
 	private String recipientActivityID = null;
 	private boolean commentNotification = false;
 	
@@ -117,10 +120,12 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		return commentPanel;
 	}
 
-	public ActivityItemView(final ActivityEntry activity, boolean expand) {
-				
+	public ActivityItemView(final ActivityEntry activity, boolean expand, int unread) {
+						
+	
+		
 		this.expanded=expand;
-		this.activity = activity;
+		this.activity = activity;			
 		
 		// add the mouseOver handlers
 		this.addMouseOverHandler(this);
@@ -132,8 +137,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
 		StyledFlowPanel infowrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");
-		StyledLabel author = new StyledLabel("link", activity.getActor()
-				.getName());
+		
+		StyledLabel author = new StyledLabel("link", activity.getActor().getName());
 		authorWrapper.add(author);
 		final OswService service = OswServiceFactory.getService();
 		
@@ -211,9 +216,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		infowrapper.add(infoLabel);
 		flow.add(statuswrapper);
 		flow.add(attachmentswrapper);
-		flow.add(infowrapper);
-		flow.add(replieswrapper);
-		replieswrapper.add(emptyIcon);
+		flow.add(infowrapper);		
+		vpanel.add(replieswrapper);				
+		flow.add(vpanel);		
 
 
 		hpanel.add(avatarwrapper);
@@ -252,46 +257,75 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 
 		statusLabel.setText(" - " + activity.getTitle());
+		commentswrapper.add(emptyIcon);
 
 		if(!commentNotification) {
 			if(activity.hasReplies()) {
 				final StyledLabel repliesLabel = new StyledLabel("replies-link", "Comments: " +
 						activity.getRepliesLink().getCount());
+				final StyledLabel notificationsLabel = new StyledLabel("replies-link", "Unread Comments: "+ unread); 
 				
 				if (expand){
 					commentPanel.compose(activity);
-					replieswrapper.add(commentPanel);
-					repliesLabel.setVisible(false);
+					vpanel.add(commentPanel);
+					commentswrapper.setVisible(false);
 				}
 
 				repliesLabel.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent event) {
 						commentPanel.compose(activity);
-						replieswrapper.add(commentPanel);
-						repliesLabel.setVisible(false);
-						AbstractActivityPanel parent =(AbstractActivityPanel) getParent();
+						vpanel.add(commentPanel);					
+						commentswrapper.setVisible(false);
+						unreadwrapper.setVisible(false);
+						AbstractActivityPanel<ActivityEntry> parent =(AbstractActivityPanel<ActivityEntry>) getParent();
 						parent.addExpanded(activity.getId());
-						//setExpanded(true);
+						parent.resetNotifications(activity.getId());	
+						notificationsLabel.setVisible(false);
 					}
 				});
-
-				replieswrapper.add(repliesLabel);
+				commentswrapper.add(repliesLabel);	
+				replieswrapper.add(commentswrapper);
+				replieswrapper.setCellWidth(commentswrapper, "20px");					
+				
+				if (unread>0 && !expanded){
+					//add the comment image and a label with the number of new comments						
+					unreadwrapper.add(notificationsLabel);					
+					unreadwrapper.add(commentIcon);
+					replieswrapper.add(unreadwrapper);
+					replieswrapper.setCellWidth(unreadwrapper, "180px");					
+					notificationsLabel.addClickHandler(new ClickHandler() {
+						public void onClick(ClickEvent event) {
+							commentPanel.compose(activity);
+							vpanel.add(commentPanel);	
+							unreadwrapper.setVisible(false);
+							commentswrapper.setVisible(false);
+							AbstractActivityPanel<ActivityEntry> parent =(AbstractActivityPanel<ActivityEntry>) getParent();
+							parent.addExpanded(activity.getId());							
+							parent.resetNotifications(activity.getId());							
+						}
+					});
+				}
+								
+				
 			} else {
 				final StyledLabel repliesLabel = new StyledLabel("replies-link", "Add a comment");
-
+				commentswrapper.add(repliesLabel);	
+				replieswrapper.add(commentswrapper);
+				
 				repliesLabel.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent event) {
-						commentPanel.compose(activity);
-						replieswrapper.add(commentPanel);
+						commentPanel.compose(activity);						
+						commentswrapper.add(commentPanel);						
 						repliesLabel.setVisible(false);							
-						AbstractActivityPanel parent =(AbstractActivityPanel) getParent();
-						parent.addExpanded(activity.getId());
-						//setExpanded(true);
+						AbstractActivityPanel parent =(AbstractActivityPanel) getParent();						
+						parent.addExpanded(activity.getId());							
+						parent.resetNotifications(activity.getId());
 					}
 				});
 
-				replieswrapper.add(repliesLabel);
-			}
+				
+					
+		
 		}
 
 		String info = "";
@@ -395,6 +429,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				});
 			}
 		}
+		}
+				
 	}
 
 
@@ -441,13 +477,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	protected void onLoad() {
 		super.onLoad();
 
-	/*	if(commentNotification) {
-			Widget parent = getParent();
-			if(parent instanceof InboxPanel) {
-				InboxPanel inbox = (InboxPanel) parent;
-				inbox.updateActivityReplies(recipientActivityID);
-			}
-		} */
 	}
 	
 	public void removeSelect() {
@@ -468,14 +497,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		handler.handleHide();
 	}
 	
-	private void showComments() {
-		// addComment();
-	}
-
-	private void addComment(String status, String authorName, String avatarUri,
-			String timestamp, String tags, String location) {
-
-	}
 
 	private void showAttachments() {
 		// addPhotoAttachment("http://www.iwatchstuff.com/2008/05/30/emily-the-strange-movie.jpg");

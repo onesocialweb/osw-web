@@ -25,7 +25,7 @@ public class FeedItemView extends ActivityItemView {
 
 
 	public FeedItemView(ActivityEntry activity) {
-		super(activity, false);
+		super(activity, false, 0);
 		
 		//prevent users to post comments
 		replieswrapper.clear();

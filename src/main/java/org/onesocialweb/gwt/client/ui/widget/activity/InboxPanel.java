@@ -42,15 +42,16 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 
 	
 	@Override
-	protected Widget render(final ActivityEntry activityEntry, boolean expand) {
+	protected Widget render(final ActivityEntry activityEntry, boolean expand, int unread) {
 		
 		if (activityEntry.getId()==null)
 			return null;
 
 		if (activityEntry.getActor()==null)
 			return null;
+		
 
-		ActivityItemView sa = new ActivityItemView(activityEntry, expand);
+		ActivityItemView sa = new ActivityItemView(activityEntry, expand, unread);
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
 				
@@ -83,6 +84,7 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 				hideButtons();
 			}
 		});
+		
 		return sa;
 	}
 

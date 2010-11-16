@@ -92,8 +92,7 @@ public class RepliesPanel<T> extends FlowPanel {
 		
 
 		protected void repaint() {
-			
-			//addNewReplies();
+						
 			clear();
 			
 			if (model.isReady()) {
