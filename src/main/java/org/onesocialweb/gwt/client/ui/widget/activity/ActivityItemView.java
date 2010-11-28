@@ -78,7 +78,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	// internationalization
 	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 	
-	private HTML statusLabel = new HTML();
 	private HTML infoLabel = new HTML();
 	private /*final*/ CommentPanel commentPanel = new CommentPanel();
 
@@ -252,7 +251,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
         }
 		statuswrapper.add(statusIcon);
 		statuswrapper2.add(authorWrapper);
-		statuswrapper2.add(statusLabel);
 		statuswrapper.add(statuswrapper2);
 		
 		editwrapper.add(buttonEdit);
@@ -307,7 +305,27 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			addStyleName("isOwner");
 		}
 
-		statusLabel.setHTML(" - " + formatTextWithLinks(activity.getTitle()));
+		statuswrapper2.add(new HTML(" - "));
+		
+		//add the activity context, with formatted links (clickable) and mentions
+		String activityContent = activity.getTitle();
+		if(activityContent.indexOf("http://")>=0 || activityContent.indexOf("@")>=0) {
+		String[] tokens = activityContent.split("\\s+");
+			for(int i=0; i<tokens.length; i++) {
+				String token = tokens[i];
+				if(token.startsWith("http://")) {
+					statuswrapper2.add(formatLink(token, i));
+				} else if(token.startsWith("@")) {
+					statuswrapper2.add(formatMention(service, token.substring(1), i));
+				} else {
+					statuswrapper2.add(formatText(token, i));
+				}
+					
+			}
+		} else {
+			statuswrapper2.add(formatText(activityContent, 0));
+		}
+		
 		commentswrapper.add(emptyIcon);
 
 		if(!commentNotification) {
@@ -751,38 +769,74 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	}
 	
 	
-	private String formatTextWithLinks(String text) {
+	private HTML formatLink(String link, int index) {
 		
-		String formattedText = "";
+		String formattedLink = "<a href='" + link + "' target='_blank'>" + link + "</a>";
 		
-		if(text.indexOf("http://") >= 0) {
-			String[] tokens = text.split("\\s+");
-			for(int i=0; i< tokens.length; i++) {
-				String token =  tokens[i];
-				if(token.startsWith("http://")) {
-					if(i == 0) {
-						formattedText = "<a href='" + token + "' target='_blank'>" + token + "</a>";
-					} else {
-						formattedText = formattedText + " " + "<a href='" + token + "' target='_blank'>" + token + "</a>";
-					}
-				} else {
-					if(i == 0) {
-						formattedText = token;
-					} else {
-						formattedText = formattedText + " " + token;
-					}
-						
-				}
-			}
-		}
-		else {
-			formattedText = text;
+		HTML htmlFragment = new HTML();
+		if(index == 0) {
+			htmlFragment.setHTML(formattedLink);
+		} else {
+			htmlFragment.setHTML(" " + formattedLink);
 		}
 		
+		return htmlFragment;
 	
-		return formattedText;
 	}
 	
+	private StyledLabel formatMention(OswService service, String mentionJID, int index) {
+		
+		final StyledLabel label = new StyledLabel("link", index==0?"@"+mentionJID:" @"+mentionJID);
+		final String JID = mentionJID;
+		final int fIndex = index;
+		label.setTitle(uiText.ViewProfileOf() + mentionJID);
+
+		service.getProfile(mentionJID,
+				new RequestCallback<Profile>() {
+
+					@Override
+					public void onFailure() {
+						// do nothing
+					}
+
+					@Override
+					public void onSuccess(Profile result) {
+						// show display name
+						final String fullName = result.getFullName();
+						if (fullName != null && fullName.length() > 0) {
+							label.setText(fIndex==0?"@"+fullName:" @"+fullName);
+						}
+
+					}
+
+				});
+
+		label.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				// get the app instance from the session manager
+				AbstractApplication app = OswClient.getInstance()
+						.getCurrentApplication();
+				ProfileWindow profileWindow = (ProfileWindow) app
+						.addWindow(ProfileWindow.class.toString(), 1);
+				profileWindow.setJID(JID);
+				profileWindow.show();
+			}
+		});
+		
+		return label;
 	
+	}
+	
+	private HTML formatText(String text, int index) {
+		
+		HTML htmlFragment = new HTML();
+		if(index == 0) {
+			htmlFragment.setText(text);
+		} else {
+			htmlFragment.setText(" " + text);
+		}
+		
+		return htmlFragment;
+	}
 
 }
