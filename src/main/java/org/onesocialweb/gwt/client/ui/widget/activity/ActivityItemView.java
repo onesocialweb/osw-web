@@ -307,7 +307,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			addStyleName("isOwner");
 		}
 
-		statusLabel.setText(" - " + activity.getTitle());
+		statusLabel.setHTML(" - " + formatTextWithLinks(activity.getTitle()));
 		commentswrapper.add(emptyIcon);
 
 		if(!commentNotification) {
@@ -748,6 +748,39 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			return null;
 		}
 
+	}
+	
+	
+	private String formatTextWithLinks(String text) {
+		
+		String formattedText = "";
+		
+		if(text.indexOf("http://") >= 0) {
+			String[] tokens = text.split("\\s+");
+			for(int i=0; i< tokens.length; i++) {
+				String token =  tokens[i];
+				if(token.startsWith("http://")) {
+					if(i == 0) {
+						formattedText = "<a href='" + token + "' target='_blank'>" + token + "</a>";
+					} else {
+						formattedText = formattedText + " " + "<a href='" + token + "' target='_blank'>" + token + "</a>";
+					}
+				} else {
+					if(i == 0) {
+						formattedText = token;
+					} else {
+						formattedText = formattedText + " " + token;
+					}
+						
+				}
+			}
+		}
+		else {
+			formattedText = text;
+		}
+		
+	
+		return formattedText;
 	}
 	
 	
