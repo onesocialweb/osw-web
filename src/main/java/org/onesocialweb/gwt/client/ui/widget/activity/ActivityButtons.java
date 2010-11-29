@@ -63,9 +63,8 @@ public class ActivityButtons extends FlowPanel {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				AlertDialog.getInstance().showDialog(
-						"Sorry this feature is not yet implemented.",
-						"We're working on this");
+				
+				activityItemView.getRepliesLabel().fireEvent(new ClickEvent(){});
 			}
 
 		});

@@ -33,7 +33,9 @@ import org.onesocialweb.gwt.client.ui.dialog.PicturePreviewDialog;
 import org.onesocialweb.gwt.client.ui.widget.StyledFlowPanel;
 import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
 import org.onesocialweb.gwt.client.ui.widget.StyledTooltipImage;
+import org.onesocialweb.gwt.client.ui.widget.TooltipPushButton;
 import org.onesocialweb.gwt.client.ui.widget.compose.CommentPanel;
+import org.onesocialweb.gwt.client.ui.widget.compose.TextareaEdit;
 import org.onesocialweb.gwt.client.ui.window.ProfileWindow;
 import org.onesocialweb.gwt.client.util.FormatHelper;
 import org.onesocialweb.gwt.service.OswService;
@@ -51,6 +53,7 @@ import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.atom.AtomReplyTo;
 import org.onesocialweb.model.vcard4.Profile;
 
+import com.calclab.suco.examples.ioc.ComponentTestingExample.Service;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -62,9 +65,11 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ActivityItemView extends FlowPanel implements MouseOverHandler,
@@ -75,7 +80,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	
 	private HTML statusLabel = new HTML();
 	private HTML infoLabel = new HTML();
-	//private final RepliesPanel repliesPanel = new RepliesPanel();
 	private /*final*/ CommentPanel commentPanel = new CommentPanel();
 
 	
@@ -86,6 +90,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private StyledTooltipImage infoIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-info.png", "icon", "");
+	
+	TooltipPushButton buttonEdit = new TooltipPushButton(new Image(
+			OswClient.getInstance().getPreference("theme_folder")
+					+ "assets/i-edit.png"), "Edit Post");
+	
+
+	
 	private StyledTooltipImage emptyIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-empty.png", "icon", "");
@@ -101,7 +112,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 	private ActivityButtonHandler handler;
 	private final ActivityEntry activity;
-//	private boolean isUpdating = false;
 	
 	private StyledFlowPanel statusActivity = new StyledFlowPanel("statusActivity");
 	
@@ -113,11 +123,23 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	protected final StyledFlowPanel unreadwrapper =  new StyledFlowPanel("author-wrapper");
 	private String recipientActivityID = null;
 	private boolean commentNotification = false;
+	private StyledLabel repliesLabel=null;
+	
+	TextareaEdit edit;
 	
 	private boolean expanded;
 
 	public CommentPanel getCommentPanel() {
 		return commentPanel;
+	}
+	
+	
+	public StyledLabel getRepliesLabel(){
+		return repliesLabel;
+	}
+	
+	public HTML getStatusLabel(){
+		return statusLabel;
 	}
 
 	public ActivityItemView(final ActivityEntry activity, boolean expand, int unread) {
@@ -134,13 +156,17 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		// Place the check above the text box using a vertical panel.
 		StyledFlowPanel flow = new StyledFlowPanel("contents");
 		StyledFlowPanel statuswrapper = new StyledFlowPanel("wrapper");
-		StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
+		final StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
+		
 		StyledFlowPanel infowrapper = new StyledFlowPanel("wrapper");
+		StyledFlowPanel editwrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");
 		
 		StyledLabel author = new StyledLabel("link", activity.getActor().getName());
 		authorWrapper.add(author);
 		final OswService service = OswServiceFactory.getService();
+		
+		edit =new TextareaEdit(this);
 		
 		boolean isComment=false;
         List<AtomReplyTo> recs=activity.getRecipients();
@@ -207,16 +233,35 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				}
 			}
 		}
-
+        
+        if (!isComment){       
+        buttonEdit.addClickHandler(new ClickHandler(){
+        	public void onClick(ClickEvent event){  
+        		if (statusLabel.isVisible()){
+        			statusLabel.setVisible(false);        		
+        			edit.setText(activity.getTitle());
+        			statuswrapper2.add(edit);
+        		}
+        		else {
+        			statusLabel.setVisible(true);        		        			
+        			statuswrapper2.remove(edit);
+        		}
+        		
+        	}
+        	});
+        }
 		statuswrapper.add(statusIcon);
 		statuswrapper2.add(authorWrapper);
 		statuswrapper2.add(statusLabel);
 		statuswrapper.add(statuswrapper2);
-		infowrapper.add(infoIcon);
+		
+		editwrapper.add(buttonEdit);
+		infowrapper.add(infoIcon);		
 		infowrapper.add(infoLabel);
-		flow.add(statuswrapper);
+
+		flow.add(statuswrapper);		
 		flow.add(attachmentswrapper);
-		flow.add(infowrapper);		
+		flow.add(infowrapper);			
 		vpanel.add(replieswrapper);				
 		flow.add(vpanel);		
 
@@ -228,7 +273,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 						+ OswClient.getInstance().getPreference("theme_folder")
 						+ "assets/avatar-loader.gif');");
 		hpanel.add(flow);
+		if ((activity.getActor().getUri().equals(OswServiceFactory.getService().getUserBareJID())) && !(isComment)){
+			hpanel.add(editwrapper);
+			hpanel.setCellWidth(editwrapper, "25px");
+		}
+		
 		hpanel.setCellWidth(avatarwrapper, "40px");
+		
 
 		// display who can see your own items
 		List<String> visibility = new ArrayList<String>();
@@ -261,7 +312,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 		if(!commentNotification) {
 			if(activity.hasReplies()) {
-				final StyledLabel repliesLabel = new StyledLabel("replies-link", uiText.Comments() + ": " +
+				repliesLabel = new StyledLabel("replies-link", uiText.Comments() + ": " +
 						activity.getRepliesLink().getCount());
 				final StyledLabel notificationsLabel = new StyledLabel("replies-link", uiText.UnreadComments() + ": "+ unread); 
 				
@@ -308,7 +359,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 								
 				
 			} else {
-				final StyledLabel repliesLabel = new StyledLabel("replies-link", "Add a comment");
+				repliesLabel = new StyledLabel("replies-link", "Add a comment");
 				commentswrapper.add(repliesLabel);	
 				replieswrapper.add(commentswrapper);
 				
@@ -334,6 +385,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			info += " - " + uiText.VisibleTo() + " " + FormatHelper.implode(visibility, ", ");
 		// if (location != "") info += " - From: " + location;
 		// if (tags != "") info += " - Tagged: " + tags;
+		
 		if(commentNotification)
 			info += " - This is a comment to a previous post";
 
@@ -358,6 +410,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		avatarImage.setStyleName("avatar");
 		infoLabel.setStyleName("info");
 		addStyleName("statusActivityWrapper");
+		
+		
 
 		// handlers
 		author.addClickHandler(new ClickHandler() {
@@ -695,9 +749,6 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 
 	}
-	
-	
-
 	
 	
 

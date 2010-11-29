@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.TextArea;
 
 public class TextareaUpdate extends FlowPanel {
 
-	private TextArea update = new TextArea();
+	protected TextArea update = new TextArea();
 
 	// private SuggestBox suggest = new SuggestBox();
 

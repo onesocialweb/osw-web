@@ -436,6 +436,7 @@ img.logo {
 	cursor: pointer;
 }
 
+
 /*
 	Suggestbox
 *****************/
@@ -801,6 +802,8 @@ img.logo {
 	padding: 2px;
 	background: #000000 url('../assets/button-bg.png') repeat-x 0 0;
 	}
+
+
 
 .gwt-PushButton-down img, .gwt-PushButton-down-hovering img{ 
 	margin: 1px 0 0 1px;
@@ -1182,6 +1185,16 @@ img.logo {
 	position: relative;
 	}
 
+.edit {
+	left: 0;
+	padding: 0px;
+	width: 50px;
+	height: 50px;
+	position: absolute;
+	background: rgba(0,0,0,0.6);
+	margin: 8px;
+	}
+
 .activityPanel .activityButtons, .contactPanel .contactButtons {
 	left: 0;
 	padding: 0px;
@@ -1191,6 +1204,10 @@ img.logo {
 	background: rgba(0,0,0,0.6);
 	margin: 8px;
 	}
+	
+.isOwner .c .gwt-PushButton {
+	background: rgba(0,0,0,0);
+}
 	
 .activityPanel .activityButtons .gwt-PushButton, .contactPanel .contactButtons .gwt-PushButton {
 	float: left;
