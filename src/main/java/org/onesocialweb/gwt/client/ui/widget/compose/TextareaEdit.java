@@ -31,8 +31,8 @@ public class TextareaEdit extends TextareaUpdate{
 
 				if (ascii == 13) {					
 					TextareaEdit.this.removeFromParent();
-					view.getStatusLabel().setText(" - " + update.getText());
-					view.getStatusLabel().setVisible(true);
+					view.formatContent(view.getStatusWrapper(),update.getText());
+					view.getStatusWrapper().setVisible(true);
 					view.getActivity().setTitle(update.getText());
 					final OswService service = OswServiceFactory.getService();
 					

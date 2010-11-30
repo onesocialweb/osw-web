@@ -53,7 +53,6 @@ import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.atom.AtomReplyTo;
 import org.onesocialweb.model.vcard4.Profile;
 
-import com.calclab.suco.examples.ioc.ComponentTestingExample.Service;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -65,7 +64,6 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -80,7 +78,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private HTML statusLabel = new HTML();
 	private HTML infoLabel = new HTML();
 	private /*final*/ CommentPanel commentPanel = new CommentPanel();
-
+	private boolean editing=false;
 	
 
 	private StyledTooltipImage avatarImage = new StyledTooltipImage("", "link",
@@ -120,6 +118,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	protected final HorizontalPanel replieswrapper = new HorizontalPanel();	
 	protected final StyledFlowPanel commentswrapper =  new StyledFlowPanel("author-wrapper");
 	protected final StyledFlowPanel unreadwrapper =  new StyledFlowPanel("author-wrapper");
+	/*final*/ StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
+	StyledFlowPanel statuswrapper = new StyledFlowPanel("wrapper");		
+	StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");
 	private String recipientActivityID = null;
 	private boolean commentNotification = false;
 	private StyledLabel repliesLabel=null;
@@ -137,8 +138,12 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		return repliesLabel;
 	}
 	
-	public HTML getStatusLabel(){
-		return statusLabel;
+	public StyledFlowPanel getStatusWrapper(){
+		return statuswrapper2;
+	}
+	
+	public void setStatusWrapper(StyledFlowPanel statusw){
+		statuswrapper2=statusw;
 	}
 
 	public ActivityItemView(final ActivityEntry activity, boolean expand, int unread) {
@@ -154,12 +159,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		
 		// Place the check above the text box using a vertical panel.
 		StyledFlowPanel flow = new StyledFlowPanel("contents");
-		StyledFlowPanel statuswrapper = new StyledFlowPanel("wrapper");
-		final StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
+	
+	//	final StyledFlowPanel statuswrapper1 = new StyledFlowPanel("wrapper2");
+		
 		
 		StyledFlowPanel infowrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel editwrapper = new StyledFlowPanel("wrapper");
-		StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");
+		
 		
 		StyledLabel author = new StyledLabel("link", activity.getActor().getName());
 		authorWrapper.add(author);
@@ -236,22 +242,32 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
         if (!isComment){       
         buttonEdit.addClickHandler(new ClickHandler(){
         	public void onClick(ClickEvent event){  
-        		if (statusLabel.isVisible()){
-        			statusLabel.setVisible(false);        		
+        		if (!editing){
+        			statuswrapper.remove(statuswrapper2);
+        			statuswrapper2= new StyledFlowPanel("wrapper2");
+        			statuswrapper2.add(authorWrapper);
+        			statuswrapper.add(statuswrapper2);
         			edit.setText(activity.getTitle());
-        			statuswrapper2.add(edit);
+        			statuswrapper.add(edit);
+        			editing=true;
         		}
         		else {
-        			statusLabel.setVisible(true);        		        			
-        			statuswrapper2.remove(edit);
+        			statuswrapper.remove(statuswrapper2);
+        			statuswrapper2= new StyledFlowPanel("wrapper2");
+        			statuswrapper2.add(authorWrapper);        			
+        			formatContent(statuswrapper2, activity.getTitle());   
+        			statuswrapper.add(statuswrapper2);
+        			statuswrapper.remove(edit);
+        			editing=false;
         		}
         		
         	}
         	});
         }
-		statuswrapper.add(statusIcon);
+        statuswrapper.add(statusIcon);
 		statuswrapper2.add(authorWrapper);
 		statuswrapper.add(statuswrapper2);
+	
 		
 		editwrapper.add(buttonEdit);
 		infowrapper.add(infoIcon);		
@@ -306,32 +322,11 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 
 				
-		List<HTML> fragments= new ArrayList<HTML>();
-		fragments.add(new HTML(" - "));
-		//add the activity context, with formatted links (clickable) and mentions
-		String activityContent = activity.getTitle();
-		if(activityContent.indexOf("http://")>=0 || activityContent.indexOf("https://")>=0 || activityContent.indexOf("@")>=0) {
-		String[] tokens = activityContent.split("\\s+");
-			for(int i=0; i<tokens.length; i++) {
-				String token = tokens[i];
-				if(token.startsWith("http://") || token.startsWith("https://")) {
-					fragments.add(formatLink(token, i));
-				} else if(token.startsWith("@")) {
-					fragments.add(formatMention(service, token.substring(1), i));
-				} else {
-					fragments.add(formatText(token, i));
-				}
-					
-			}
-		} else {
-			fragments.add(formatText(activityContent, 0));
-		}
-		String label = "";
-		for (HTML fragment: fragments){
-			label+=fragment.getText();
-		}
-		statusLabel.setHTML(label);
-		statuswrapper2.add(statusLabel);
+		formatContent(statuswrapper2,  activity.getTitle());
+		statuswrapper2.setVisible(true);
+		statuswrapper.add(statuswrapper2);
+		
+				
 		
 		commentswrapper.add(emptyIcon);
 
@@ -512,6 +507,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				
 	}
 
+	
 
 	public ActivityEntry getActivity() {
 		return activity;
@@ -741,6 +737,32 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 					+ "assets/i-notavailable.png");
 			statusIcon.setTitle("Not available");
 		}
+	}
+	
+	public void formatContent(StyledFlowPanel statuswrapper, String activityContent){
+		
+		
+		final OswService service = OswServiceFactory.getService();
+		
+		statuswrapper.add(new HTML(" - "));
+		//add the activity context, with formatted links (clickable) and mentions	
+		if(activityContent.indexOf("http://")>=0 || activityContent.indexOf("https://")>=0 || activityContent.indexOf("@")>=0) {
+		String[] tokens = activityContent.split("\\s+");
+			for(int i=0; i<tokens.length; i++) {
+				String token = tokens[i];
+				if(token.startsWith("http://") || token.startsWith("https://")) {
+					statuswrapper.add(formatLink(token, i));
+				} else if(token.startsWith("@")) {
+					statuswrapper.add(formatMention(service, token.substring(1), i));
+				} else {
+					statuswrapper.add(formatText(token, i));
+				}
+					
+			}
+		} else {
+			statuswrapper.add(formatText(activityContent, 0));
+		}
+		
 	}
 
 	private String extractRecipientJID(String recipientHref) {
