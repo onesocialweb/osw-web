@@ -305,8 +305,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			addStyleName("isOwner");
 		}
 
-		statuswrapper2.add(new HTML(" - "));
-		
+				
+		List<HTML> fragments= new ArrayList<HTML>();
+		fragments.add(new HTML(" - "));
 		//add the activity context, with formatted links (clickable) and mentions
 		String activityContent = activity.getTitle();
 		if(activityContent.indexOf("http://")>=0 || activityContent.indexOf("https://")>=0 || activityContent.indexOf("@")>=0) {
@@ -314,17 +315,23 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			for(int i=0; i<tokens.length; i++) {
 				String token = tokens[i];
 				if(token.startsWith("http://") || token.startsWith("https://")) {
-					statuswrapper2.add(formatLink(token, i));
+					fragments.add(formatLink(token, i));
 				} else if(token.startsWith("@")) {
-					statuswrapper2.add(formatMention(service, token.substring(1), i));
+					fragments.add(formatMention(service, token.substring(1), i));
 				} else {
-					statuswrapper2.add(formatText(token, i));
+					fragments.add(formatText(token, i));
 				}
 					
 			}
 		} else {
-			statuswrapper2.add(formatText(activityContent, 0));
+			fragments.add(formatText(activityContent, 0));
 		}
+		String label = "";
+		for (HTML fragment: fragments){
+			label+=fragment.getText();
+		}
+		statusLabel.setHTML(label);
+		statuswrapper2.add(statusLabel);
 		
 		commentswrapper.add(emptyIcon);
 
