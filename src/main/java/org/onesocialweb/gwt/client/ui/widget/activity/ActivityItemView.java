@@ -167,7 +167,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		
 		edit =new TextareaEdit(this);
 		
-		boolean isComment=false;
+		boolean isComment=activity.getParentId()!=null && activity.getParentJID()!=null;
         List<AtomReplyTo> recs=activity.getRecipients();
         Iterator<AtomReplyTo> itRecipients=recs.iterator();
 
