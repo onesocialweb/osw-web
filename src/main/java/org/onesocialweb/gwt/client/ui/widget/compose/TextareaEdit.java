@@ -2,8 +2,8 @@ package org.onesocialweb.gwt.client.ui.widget.compose;
 
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
-import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.ui.widget.activity.ActivityItemView;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
@@ -13,7 +13,6 @@ import org.onesocialweb.model.activity.ActivityEntry;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.client.ui.HTML;
 
 public class TextareaEdit extends TextareaUpdate{
 	
@@ -29,7 +28,7 @@ public class TextareaEdit extends TextareaUpdate{
 				char keyCode = event.getCharCode();
 				int ascii = (int) keyCode;				
 
-				if (ascii == 13) {					
+				if ((ascii == 13) && (update.getText()!=null) && (update.getText().length()!=0) && (hasText(update.getText()))) {					
 					TextareaEdit.this.removeFromParent();
 					view.formatContent(view.getStatusWrapper(),update.getText());
 					view.getStatusWrapper().setVisible(true);
@@ -59,5 +58,15 @@ public class TextareaEdit extends TextareaUpdate{
 		});
 	}	
 	
+	private boolean hasText(String text){
+		boolean hasText=false;
+		for (int i=0; i<text.length();i++){
+			if (text.charAt(i)!='\n'){
+				hasText=true;
+				return hasText;
+			}
+		}
+		return hasText;
+	}
 
 }
