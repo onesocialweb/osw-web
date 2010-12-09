@@ -95,6 +95,7 @@ public class AvatarUploadField extends Composite {
 	public void setAvatar(String url) {
 		thumb.setPicture(url);
 		setStateAvatarLoaded();
+		avatarUri=url;
 	}
 	
 	private void setStateAvatarLoaded() {

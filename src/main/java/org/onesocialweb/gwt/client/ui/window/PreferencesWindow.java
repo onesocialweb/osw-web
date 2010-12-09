@@ -507,14 +507,15 @@ public class PreferencesWindow extends AbstractWindow {
 
 				try {
 					// prepare for updating and check for empty values
+										
 					if (avatarF.getAvatarUri().length() > 0)
 						profile.addField(profileFactory.photo(avatarF.getAvatarUri()));
 					if (displaynameF.getText().length() > 0)
 						profile.addField(profileFactory.fullname(displaynameF.getText()));
 					if (nameF.getFirstName().length() > 0 || nameF.getLastName().length() > 0)
 						profile.addField(profileFactory.name(null, nameF.getFirstName(), nameF.getLastName(), null));
-					if (birthdayF.getDate() != null)
-						profile.addField(profileFactory.birthday(birthdayF.getDate()));
+					if (birthdayF.getDate() != null)						
+						profile.addField(profileFactory.birthday(birthdayF.getDate()));					
 					if (genderF.getGenderText().length() > 0) {
 						if (genderF.getGenderValue().equals(GenderField.Type.MALE.toString())) {
 							profile.addField(profileFactory.gender(GenderField.Type.MALE));
