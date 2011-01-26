@@ -281,9 +281,10 @@ public class OswClient {
 	
 	private void initLocales() {
 		OSWLocales.put("default", "English");
-		OSWLocales.put("nl", "Nederlands");
+		OSWLocales.put("de", "Deutsch");
 		OSWLocales.put("fr", "Français");
 		OSWLocales.put("it", "Italiano");
+		OSWLocales.put("nl", "Nederlands");
 		OSWLocales.put("zh", "\u4E2D\u6587");
 	}
 	
