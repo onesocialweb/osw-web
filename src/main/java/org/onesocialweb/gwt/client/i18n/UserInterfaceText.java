@@ -45,6 +45,7 @@ public interface UserInterfaceText extends Constants {
 	String Account();
 	String Add();
 	String PostComment();
+	
 
 	// Labels
 	String YourUsername();
@@ -85,6 +86,7 @@ public interface UserInterfaceText extends Constants {
 	String VisibleTo();
 	String Comments();
 	String UnreadComments();
+	String AddComments();
 	
 	// Application / window names
 	String Activities();

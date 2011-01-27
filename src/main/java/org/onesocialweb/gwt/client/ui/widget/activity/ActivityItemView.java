@@ -380,7 +380,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 								
 				
 			} else {
-				repliesLabel = new StyledLabel("replies-link", "Add a comment");
+				repliesLabel = new StyledLabel("replies-link", uiText.AddComments());
 				commentswrapper.add(repliesLabel);	
 				replieswrapper.add(commentswrapper);
 				

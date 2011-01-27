@@ -319,7 +319,7 @@ public class CommentPanel extends Composite {
 	private /*final*/ RepliesPanel<ActivityEntry> replies = new RepliesPanel<ActivityEntry>();
 	
 	private final Label attachment = new Label("Add:");
-	private final Button buttonUpdate = new Button("Post your comment");
+	private final Button buttonUpdate = new Button(uiText.PostComment());
 	private final TextareaUpdate textareaUpdate = new TextareaUpdate();
 	private boolean localComment = false;
 
