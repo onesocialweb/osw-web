@@ -216,7 +216,7 @@ public abstract class AbstractActivityPanel<T> extends FlowPanel {
 	
 	protected void addEmptyModelMessage() {
 		StyledLabel msg = new StyledLabel("message",
-			"There are no status updates available.");
+			uiText.NoStatusUpdates());
 		add(msg);
 	}
 
