@@ -45,6 +45,7 @@ public interface UserInterfaceText extends Constants {
 	String Account();
 	String Add();
 	String PostComment();
+	String CreateList();
 	
 
 	// Labels

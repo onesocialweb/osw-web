@@ -83,7 +83,7 @@ public class ContactsWindow extends AbstractWindow {
 		toggleSearchPanel.setDown(true);
 
 		getActions().add(toggleSearchPanel);
-		toggleSearchPanel.setTitle(uiText.ShowSearchPanel());
+		toggleSearchPanel.setTitle(uiText.HideSearchPanel());
 		toggleSearchPanel.addStyleDependentName("toggleShowUpdate");
 
 		getContents().add(contactPanel);
@@ -100,10 +100,10 @@ public class ContactsWindow extends AbstractWindow {
 	private void toggleSearchPanel() {
 		if (searchPanel.isVisible()) {
 			searchPanel.setVisible(false);
-			toggleSearchPanel.setTitle("Show search panel");
+			toggleSearchPanel.setTitle(uiText.ShowSearchPanel());
 		} else {
 			searchPanel.setVisible(true);
-			toggleSearchPanel.setTitle("Hide search panel");
+			toggleSearchPanel.setTitle(uiText.HideSearchPanel());
 			searchPanel.onShow();
 		}
 
