@@ -44,6 +44,23 @@
 		</init-param>
 	</servlet>
 	
+		<servlet>
+		<servlet-name>MailProxy</servlet-name>
+		<servlet-class>de.spieleck.servlets.ProxyServlet</servlet-class>
+		<init-param>
+			<param-name>remotePath</param-name>
+			<param-value>/email</param-value>
+		</init-param>
+		<init-param>
+			<param-name>remoteServer</param-name>
+			<param-value>localhost</param-value>
+		</init-param>
+		<init-param>
+			<param-name>remotePort</param-name>
+			<param-value>80</param-value>
+		</init-param>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>BOSHProxy</servlet-name>
 		<url-pattern>/OswClient/bosh</url-pattern>
@@ -52,6 +69,11 @@
 	<servlet-mapping>
 		<servlet-name>FileProxy</servlet-name>
 		<url-pattern>/OswClient/file</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>MailProxy</servlet-name>
+		<url-pattern>/OswClient/email</url-pattern>
 	</servlet-mapping>
 	
 </web-app>

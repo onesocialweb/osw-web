@@ -37,14 +37,16 @@
 		  	bosh_host: "onesocialweb.local", 
 
 		  	// Absolute path to the BOSH endpoint
-		  	bosh_path: "/OswClient/bosh",
+		  	bosh_path: "/bosh",
 
 		  	// What the XMPP domain is
 		  	xmpp_domain: "onesocialweb.local",
 
 		  	// Absolute path to the file servlet
-		  	upload_endpoint: "/OswClient/file",
+		  	upload_endpoint: "/file",
 		  	file_retrieval_endpoint: "http://test.onesocialweb.local/file",
+		  	
+		  	email_endpoint: "/email",
 
 		  	// If true, we may do a bit more of logging
 			developer_mode: "true",
@@ -53,8 +55,11 @@
 			// If true, allows registration on this server
 			registration_allowed: "true",
 
-			// If true, allows registration on this server only via a registration code
-			registration_code: "true"
+			// If true, allows registration on this server only via a registration code which needs to be manually created by the admin
+			registration_code: "true",
+			
+			// If true, provision of registration codes is automatic per email
+			registration_email: "true"
 		};
 	</script>
 
