@@ -9,6 +9,9 @@ import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
 import org.onesocialweb.model.activity.ActivityEntry;
+import org.onesocialweb.model.activity.ActivityFactory;
+import org.onesocialweb.model.activity.ActivityObject;
+import org.onesocialweb.model.atom.AtomFactory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -33,7 +36,21 @@ public class TextareaEdit extends TextareaUpdate{
 					view.formatContent(view.getStatusWrapper(),update.getText());
 					view.getStatusWrapper().setVisible(true);
 					view.getActivity().setTitle(update.getText());
+					
 					final OswService service = OswServiceFactory.getService();
+					final AtomFactory atomFactory = service.getAtomFactory();
+					final ActivityFactory activityFactory = service.getActivityFactory();
+					
+					for (ActivityObject object : view.getActivity().getObjects()){
+						if (object.getType().equals(ActivityObject.STATUS_UPDATE)){					
+							view.getActivity().getObjects().remove(object);
+							object = activityFactory.object();
+							object.setType(ActivityObject.STATUS_UPDATE);
+							object.addContent(atomFactory.content(update.getText(), "text/plain", null));
+							view.getActivity().addObject(object);
+						}
+					}		
+										
 					
 					final UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
 					final DefaultTaskInfo task = new DefaultTaskInfo(uiText.UpdatingStatus(), false);
