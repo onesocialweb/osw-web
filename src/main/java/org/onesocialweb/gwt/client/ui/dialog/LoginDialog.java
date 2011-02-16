@@ -24,8 +24,10 @@ import org.onesocialweb.gwt.client.i18n.UserInterfaceMessages;
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.ui.widget.ErrorLabel;
 import org.onesocialweb.gwt.client.ui.widget.FieldLabel;
+import org.onesocialweb.gwt.client.ui.widget.StyledLabel;
 import org.onesocialweb.gwt.client.validation.CustomLabelTextAction;
 import org.onesocialweb.gwt.model.GwtFormField;
+import org.onesocialweb.gwt.service.ERequestCallback;
 import org.onesocialweb.gwt.service.GwtDataForm;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
@@ -52,6 +54,7 @@ import eu.maydu.gwt.validation.client.DefaultValidationProcessor;
 import eu.maydu.gwt.validation.client.ValidationProcessor;
 import eu.maydu.gwt.validation.client.actions.StyleAction;
 import eu.maydu.gwt.validation.client.validators.StringLengthValidator;
+import eu.maydu.gwt.validation.client.validators.standard.NotEmptyValidator;
 import eu.maydu.gwt.validation.client.validators.strings.EmailValidator;
 
 public class LoginDialog extends AbstractDialog {
@@ -74,6 +77,7 @@ public class LoginDialog extends AbstractDialog {
 	private final TextBox usernameText = new TextBox();
 	private final PasswordTextBox passwordText = new PasswordTextBox();
 	private final CheckBox rememberme = new CheckBox(uiText.RememberMe());
+	private final FlowPanel registerflow = new FlowPanel();
 
 	private LoginHandler handler;
 
@@ -123,19 +127,23 @@ public class LoginDialog extends AbstractDialog {
 		FieldLabel password = new FieldLabel(uiText.YourPassword());
 		FlowPanel loginflow = new FlowPanel();
 
-		FlowPanel registerflow = new FlowPanel();
+		
 		FieldLabel usernameRegister = new FieldLabel(uiText.ChooseUsername());
+		FieldLabel nameRegister = new FieldLabel(uiText.EnterName());
 		FieldLabel passwordRegister = new FieldLabel(uiText.ChoosePassword());
 		FieldLabel emailRegister = new FieldLabel(uiText.EnterYourEmail());
 		FieldLabel codeRegister = new FieldLabel(uiText.EnterCode());
 		final TextBox usernameTextRegister = new TextBox();
 		final PasswordTextBox passwordTextRegister = new PasswordTextBox();
+		final TextBox nameTextRegister = new TextBox();
 		final TextBox emailTextRegister = new TextBox();
 		final TextBox codeTextRegister = new TextBox();
 		ErrorLabel usernameRegisterError = new ErrorLabel();
 		ErrorLabel passwordRegisterError = new ErrorLabel();
+		ErrorLabel nameRegisterError = new ErrorLabel();
 		ErrorLabel emailRegisterError = new ErrorLabel();
 		ErrorLabel codeRegisterError = new ErrorLabel();
+		
 
 		registerflow.setStyleName("tabcontentflowlayout");
 		loginflow.setStyleName("tabcontentflowlayout");
@@ -143,8 +151,8 @@ public class LoginDialog extends AbstractDialog {
 		tabpanel.add(loginflow, uiText.Login());
 		
 		// if registration is enabled
-		if (OswClient.getInstance().getPreference("registration_allowed").equals("true")) {
-			tabpanel.add(registerflow, uiText.Register());
+		if (OswClient.getInstance().getPreference("registration_allowed").equals("true")) {			
+				tabpanel.add(registerflow, uiText.Register());			
 		}
 		
 		rememberme.addStyleName("checkbox");
@@ -162,15 +170,28 @@ public class LoginDialog extends AbstractDialog {
 		registerflow.add(passwordRegister);
 		registerflow.add(passwordTextRegister);
 		registerflow.add(passwordRegisterError);
+		registerflow.add(nameRegister);
+		registerflow.add(nameTextRegister);
+		registerflow.add(nameRegisterError);
 		registerflow.add(emailRegister);
 		registerflow.add(emailTextRegister);
 		registerflow.add(emailRegisterError);
+		
+		StyledLabel requestLabel = new StyledLabel("replies-link", "  "+ uiText.RequestCode());
+		FlowPanel requestLabelPanel = new FlowPanel();
+		requestLabelPanel.add(requestLabel);
+				
+		
 		
 		// if registration via a registration code only is enabled
 		if (OswClient.getInstance().getPreference("registration_code").equals("true")) {
 			registerflow.add(codeRegister);
 			registerflow.add(codeTextRegister);
 			registerflow.add(codeRegisterError);
+		}
+		
+		if (OswClient.getInstance().getPreference("registration_email").equals("true")) {
+			registerflow.add(requestLabelPanel);
 		}
 
 		buttoncontainer.add(buttonLogin);
@@ -242,6 +263,10 @@ public class LoginDialog extends AbstractDialog {
 				field.addValue(passwordTextRegister.getText());
 				form.addField(field);
 				
+				field = new GwtFormField("name");		
+				field.addValue(nameTextRegister.getText());
+				form.addField(field);
+				
 				
 				field = new GwtFormField("email");		
 				field.addValue(emailTextRegister.getText());
@@ -255,13 +280,16 @@ public class LoginDialog extends AbstractDialog {
 					// No validation errors found. We can submit the data to the
 					// server!
 					
-					OswServiceFactory.getService().register(form, new RequestCallback<Object>() {
+					OswServiceFactory.getService().register(form, new ERequestCallback<Object>() {
 
 								@Override
-								public void onFailure() {
-									AlertDialog.getInstance().showDialog(
-											uiText.RegistrationFailureDetails(),
-											uiText.RegistrationFailure());
+								public void onFailure(Object error) {
+									if (error==null) {
+										AlertDialog.getInstance().showDialog(uiText.RegistrationFailureDetails(), uiText.RegistrationFailure());
+									}
+									else {
+										AlertDialog.getInstance().showDialog(error.toString(), uiText.RegistrationFailure());
+									}
 								}
 
 								@Override
@@ -290,6 +318,15 @@ public class LoginDialog extends AbstractDialog {
 				processLogin();
 			}
 		});
+		
+		requestLabel.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				RequestCodeDialog codeDialog = new RequestCodeDialog();
+				codeDialog.show();
+			}
+		});
+		
+		
 
 		validator.addValidators("Username", new StringLengthValidator(
 				usernameTextRegister, 4, 25).addActionForFailure(
@@ -305,6 +342,17 @@ public class LoginDialog extends AbstractDialog {
 				.addActionForFailure(new StyleAction("validationFailed"))
 				.addActionForFailure(
 						new CustomLabelTextAction(emailRegisterError, false)));
+		
+		validator.addValidators("Name", new NotEmptyValidator(nameTextRegister)
+		.addActionForFailure(new StyleAction("validationFailed"))
+		.addActionForFailure(new CustomLabelTextAction(nameRegisterError, false)));
+		
+		if (OswClient.getInstance().getPreference("registration_code").equals("true")) {
+			validator.addValidators("Code", new NotEmptyValidator(codeTextRegister)
+			.addActionForFailure(new StyleAction("validationFailed"))
+			.addActionForFailure(new CustomLabelTextAction(codeRegisterError, false)));
+		}
+		
 
 	}
 

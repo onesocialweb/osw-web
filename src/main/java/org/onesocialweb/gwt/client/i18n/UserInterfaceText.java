@@ -46,6 +46,10 @@ public interface UserInterfaceText extends Constants {
 	String Add();
 	String PostComment();
 	String CreateList();
+	String RequestCode();
+	String RequestCodeShort();
+	String Thanks();
+	String Request();
 	
 	// Labels
 	String YourUsername();
@@ -87,6 +91,9 @@ public interface UserInterfaceText extends Constants {
 	String Comments();
 	String UnreadComments();
 	String AddComments();
+	String CheckEmail();
+	String Captcha();
+	String EnterName();
 	
 	// Application / window names
 	String Activities();
@@ -166,6 +173,7 @@ public interface UserInterfaceText extends Constants {
 	String CommentFailure();
 	String RegistrationFailure();
 	String RegistrationFailureDetails();
+	String CouldntConnect();
 	
 	// Months
 	String January();

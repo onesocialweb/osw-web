@@ -194,6 +194,12 @@
             <artifactId>gwt-vl</artifactId>
             <version>0.9a</version>
         </dependency>
+        <dependency>
+                        <groupId>com.claudiushauptmann</groupId>
+                        <artifactId>gwt-recaptcha</artifactId>
+                        <scope>provided</scope>
+                        <version>1.0.0.Beta2</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -214,8 +220,7 @@
         <repository>
             <id>lib-repo</id>
             <url>http://svn.apache.org/repos/asf/james/hupa/lib</url>
-        </repository>
-
+        </repository>  
         <repository>
             <id>vodafonernd.com</id>
             <name>vodafonernd.com-releases</name>
