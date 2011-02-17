@@ -19,10 +19,14 @@
  */
 package org.onesocialweb.gwt.client.ui.widget.activity;
 
+import java.util.List;
+
 import org.onesocialweb.gwt.client.handler.ActivityButtonHandler;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.model.activity.ActivityEntry;
+import org.onesocialweb.model.atom.AtomReplyTo;
 
+import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.google.gwt.user.client.ui.Widget;
 
 public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
@@ -49,6 +53,18 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 
 		if (activityEntry.getActor()==null)
 			return null;
+		
+		//check that none of the recipients uri is malformed. This can be introduce in the command line console and
+		// will then break the web application
+		List<AtomReplyTo> recipients= activityEntry.getRecipients();
+		for (AtomReplyTo recipient: recipients){
+			try {
+				XmppURI ur =  XmppURI.jid(recipient.getHref());
+				
+			}catch (RuntimeException e){
+				return null;
+			}
+		}
 		
 
 		ActivityItemView sa = new ActivityItemView(activityEntry, expand, unread);
