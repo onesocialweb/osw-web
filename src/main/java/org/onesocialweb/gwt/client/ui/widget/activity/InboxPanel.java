@@ -54,18 +54,22 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 		if (activityEntry.getActor()==null)
 			return null;
 		
-		//check that none of the recipients uri is malformed. This can be introduce in the command line console and
+		//check that none of the recipients uri is malformed. This can be introduce in the command line console or android app and
 		// will then break the web application
-		List<AtomReplyTo> recipients= activityEntry.getRecipients();
+/*		List<AtomReplyTo> recipients= activityEntry.getRecipients();
 		for (AtomReplyTo recipient: recipients){
-			try {
-				XmppURI ur =  XmppURI.jid(recipient.getHref());
+			if ((recipient.getHref()!=null)) {
+				try {
 				
-			}catch (RuntimeException e){
-				return null;
+					XmppURI ur =  XmppURI.jid(recipient.getHref());
+				
+				}catch (RuntimeException e){
+					recipients.remove(recipient);
+					activityEntry.setRecipients(recipients);
+				}
 			}
 		}
-		
+	*/	
 
 		ActivityItemView sa = new ActivityItemView(activityEntry, expand, unread);
 		sa.setButtonHandler(new ActivityButtonHandler() {

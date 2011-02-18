@@ -53,6 +53,7 @@ import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.atom.AtomReplyTo;
 import org.onesocialweb.model.vcard4.Profile;
 
+import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -180,15 +181,14 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
         while (itRecipients.hasNext()){
                 AtomReplyTo recipient=itRecipients.next();
-                if (recipient.getHref().contains("?;node"))
+                if ((recipient.getHref()!=null)  && recipient.getHref().contains("?;node"))
                         isComment=true;
         }
 
 
-        if ((!isComment) && (activity.hasRecipients())) {
+        if ((!isComment) && (activity.hasRecipients()) && (oneValidRecipient(activity.getRecipients()))) {
 			authorWrapper.add(new StyledLabel("separator", " " + uiText.To() + " "));
-			Iterator<AtomReplyTo> recipients = activity.getRecipients()
-					.iterator();
+			Iterator<AtomReplyTo> recipients = activity.getRecipients().iterator();
 			while (recipients.hasNext()) {
 				final AtomReplyTo recipient = recipients.next();
 
@@ -201,6 +201,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				final StyledLabel label = new StyledLabel("link", recipientJID);
 				label.setTitle(uiText.ViewProfileOf() + recipientJID);
 
+				if ((recipientJID!=null) && (recipientJID.length()!=0)) {
+					
+				
 				service.getProfile(recipientJID,
 						new RequestCallback<Profile>() {
 
@@ -220,6 +223,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 							}
 
 						});
+				
+				}
 
 				label.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent event) {
@@ -754,7 +759,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				String token = tokens[i];
 				if(token.startsWith("http://") || token.startsWith("https://")) {
 					statuswrapper.add(formatLink(token, i));
-				} else if(token.startsWith("@")) {
+				} else if(token.startsWith("@") && token.length()>1 && isValidJID(token.substring(1))) {
 					statuswrapper.add(formatMention(service, token.substring(1), i));
 				} else {
 					statuswrapper.add(formatText(token, i));
@@ -768,6 +773,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	}
 
 	private String extractRecipientJID(String recipientHref) {
+		if (recipientHref==null)
+			return "";
+		
 		if(recipientHref.startsWith("xmpp:")) {
 			int i = recipientHref.indexOf("?");
 			if(i == -1) {
@@ -784,6 +792,10 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 	private String extractRecipientActivityID(String recipientHref) {
 
+		if (recipientHref==null)		
+			return null; 
+		
+		
 		if(recipientHref.startsWith("xmpp:")) {
 			int i = recipientHref.indexOf("item=");
 			if(i == -1) {
@@ -822,6 +834,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		final int fIndex = index;
 		label.setTitle(uiText.ViewProfileOf() + mentionJID);
 
+		if ((mentionJID!=null) && (mentionJID.length()>1)){
+			
+		
 		service.getProfile(mentionJID,
 				new RequestCallback<Profile>() {
 
@@ -842,6 +857,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 				});
 
+		}
 		label.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				// get the app instance from the session manager
@@ -868,6 +884,24 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 		
 		return htmlFragment;
+	}
+	
+	private boolean oneValidRecipient(List<AtomReplyTo> recipients){
+		for (AtomReplyTo rec: recipients){
+			if ((rec.getHref()!=null) && (rec.getHref().length()!=0))
+				if (isValidJID(rec.getHref()))
+					return true;
+		}
+		return false;
+	}
+	
+	private boolean isValidJID(String jid){
+		try {
+			XmppURI ur =  XmppURI.jid(jid);
+			return true;
+		}catch (RuntimeException e){
+			return false;
+		}
 	}
 
 }

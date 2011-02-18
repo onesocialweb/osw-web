@@ -55,16 +55,17 @@ public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 		
 		//check that none of the recipients uri is malformed. This can be introduce in the command line console and
 		// will then break the web application
-		List<AtomReplyTo> recipients= activityEntry.getRecipients();
+	/*	List<AtomReplyTo> recipients= activityEntry.getRecipients();
 		for (AtomReplyTo recipient: recipients){
 			try {
 				XmppURI ur =  XmppURI.jid(recipient.getHref());
 				
 			}catch (RuntimeException e){
-				return null;
+				recipients.remove(recipient);
+				activityEntry.setRecipients(recipients);
 			}
 		}
-		
+	*/	
 		
 		ActivityItemView sa = new ActivityItemView(activityEntry, expand, unread);
 		sa.setButtonHandler(new ActivityButtonHandler() {
