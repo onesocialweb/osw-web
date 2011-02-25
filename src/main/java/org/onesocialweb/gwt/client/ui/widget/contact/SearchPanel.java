@@ -20,6 +20,7 @@ import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
 import org.onesocialweb.gwt.client.task.TaskMonitor;
+import org.onesocialweb.gwt.client.task.TaskInfo.Status;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
 import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.client.ui.widget.StyledButton;
@@ -131,9 +132,10 @@ public class SearchPanel extends Composite {
 									.getCurrentApplication();
 							ProfileWindow profileWindow = (ProfileWindow) app
 									.addWindow(ProfileWindow.class.toString(),
-											1);
+											1);							
 							profileWindow.setJID(input.getText());
 							profileWindow.show();
+							task.complete("", Status.succes);
 						}
 
 					});

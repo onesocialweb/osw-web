@@ -17,7 +17,6 @@
 package org.onesocialweb.gwt.client.ui.window;
 
 import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addHTMLLabelRow;
-import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addWidgetRow;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,8 +26,8 @@ import java.util.List;
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
-import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
 import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.client.ui.widget.ListSelector;
@@ -46,18 +45,16 @@ import org.onesocialweb.gwt.util.HtmlHelper;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.vcard4.BirthdayField;
-import org.onesocialweb.model.vcard4.DefaultGenderField;
 import org.onesocialweb.model.vcard4.EmailField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
 import org.onesocialweb.model.vcard4.NameField;
 import org.onesocialweb.model.vcard4.NoteField;
-import org.onesocialweb.model.vcard4.PhotoField;
 import org.onesocialweb.model.vcard4.Profile;
 import org.onesocialweb.model.vcard4.TelField;
 import org.onesocialweb.model.vcard4.URLField;
+import org.onesocialweb.xml.namespace.VCard4;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,7 +66,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
-import com.reveregroup.gwt.imagepreloader.FitImage;
 
 public class ProfileWindow extends AbstractWindow {
 
@@ -114,9 +110,31 @@ public class ProfileWindow extends AbstractWindow {
 
 	private RosterEventHandler rosterhandler;
 	private RosterItem rosterItem;
+	private boolean ostatus;
+	
+	public void setProfile (String jid, Profile p){
+		// setup window
+		setStyle("profileWindow");
+		setWindowTitle(uiText.Profile());
+		enableClose();
+
+		// set profile ID
+		this.jid = jid;
+
+		// keep track if this is a profile for the signed in user
+		if (jid.equals(OswServiceFactory.getService().getUserBareJID()))
+			isSignedinUser = true;
+		composeWindow();
+		hasProfile = true;
+		model=p;
+		if ((p.hasField(VCard4.SOURCE_ELEMENT)) && (p.getSource()!=null) || (p.getSource().equals("ostatus")))
+			ostatus=true;
+
+	}
 
 	public void setJID(String jid) {
 
+		
 		// setup window
 		setStyle("profileWindow");
 		setWindowTitle(uiText.Profile());
@@ -129,9 +147,8 @@ public class ProfileWindow extends AbstractWindow {
 		if (jid.equals(OswServiceFactory.getService().getUserBareJID()))
 			isSignedinUser = true;
 
-		// Fetch the new profile
-		final DefaultTaskInfo task = new DefaultTaskInfo(
-				uiText.FetchingProfile(), false);
+	// Fetch the new profile
+		final DefaultTaskInfo task = new DefaultTaskInfo(uiText.FetchingProfile(), false);
 		TaskMonitor.getInstance().addTask(task);
 		OswServiceFactory.getService().getProfile(jid,
 				new RequestCallback<Profile>() {
@@ -160,6 +177,7 @@ public class ProfileWindow extends AbstractWindow {
 					}
 
 				});
+		
 	}
 
 	@Override
@@ -171,6 +189,9 @@ public class ProfileWindow extends AbstractWindow {
 	}
 
 	private void composeWindow() {
+		
+		if ((model!=null) && (model.hasField(VCard4.SOURCE_ELEMENT)) && (model.getSource()!=null) && (model.getSource().equals("ostatus")))
+			ostatus=true;
 
 		TooltipPushButton message = new TooltipPushButton(new Image(OswClient
 				.getInstance().getPreference("theme_folder")
@@ -180,9 +201,11 @@ public class ProfileWindow extends AbstractWindow {
 				+ "assets/i-chat.png"), uiText.ChatWithPerson());
 		FlowPanel activities = new FlowPanel();
 		FeedPanel activityPanel = new FeedPanel();
-		Stream<ActivityEntry> userActivities = OswServiceFactory.getService().getActivities(jid);
-		activityPanel.setModel(userActivities);
+		if (!ostatus){
+			Stream<ActivityEntry> userActivities = OswServiceFactory.getService().getActivities(jid);
+			activityPanel.setModel(userActivities);
 
+		}
 		// User avatar
 		Image avatar = new Image();
 		if (model != null) {
@@ -241,6 +264,7 @@ public class ProfileWindow extends AbstractWindow {
 		following.setVisible(false);
 		summary.add(following);
 
+		if (!ostatus){
 		// Are we following this person ?
 		OswServiceFactory.getService().getSubscriptions(
 				OswServiceFactory.getService().getUserBareJID(),
@@ -268,6 +292,10 @@ public class ProfileWindow extends AbstractWindow {
 					}
 
 				});
+		} else {
+			isFollowing = false;
+			following.setVisible(false);
+		}
 
 		buttonPanel.addStyleName("panel");
 
@@ -300,14 +328,23 @@ public class ProfileWindow extends AbstractWindow {
 
 		activities.add(activityPanel);
 
+		
 		tabpanel.add(activities, uiText.Activities());
 		tabpanel.add(details, uiText.Profile());
 
 		// You don't need to manage yourself
-		if (!isSignedinUser)
-			tabpanel.add(manage, uiText.ManagePerson());
+		if (!isSignedinUser) {			
+				tabpanel.add(manage, uiText.ManagePerson());
+		}
 
-		tabpanel.selectTab(0);
+		if (!ostatus)
+			tabpanel.selectTab(0);
+		else { 
+			tabpanel.selectTab(1);	
+			loadFullProfile();
+			tabpanel.remove(0);
+			tabpanel.remove(1);
+		}
 
 		getContents().add(summaryWrapper);
 		getContents().add(tabpanel);
@@ -439,6 +476,9 @@ public class ProfileWindow extends AbstractWindow {
 
 	private void loadFullProfile() {
 
+		if ((model.hasField(VCard4.SOURCE_ELEMENT)) && (model.getSource()!=null) && (model.getSource().equals("ostatus")))
+			ostatus=true;
+		
 		// setup layout
 
 		// profile section
@@ -455,6 +495,7 @@ public class ProfileWindow extends AbstractWindow {
 		StyledLabel followersLabel = new StyledLabel("grouplabel", uiText.Followers());
 		final StyledLabel followersInstruction = new StyledLabel("instruction",
 				"");
+		if (!ostatus)
 		details.add(sectionFollowers);
 		sectionFollowers.add(followersLabel);
 		sectionFollowers.add(followersInstruction);
@@ -465,6 +506,7 @@ public class ProfileWindow extends AbstractWindow {
 		StyledLabel followingLabel = new StyledLabel("grouplabel", uiText.FollowingPeople());
 		final StyledLabel followingInstruction = new StyledLabel("instruction",
 				"");
+		if (!ostatus)
 		details.add(sectionFollowing);
 		sectionFollowing.add(followingLabel);
 		sectionFollowing.add(followingInstruction);
@@ -555,6 +597,7 @@ public class ProfileWindow extends AbstractWindow {
 
 		}
 
+		if (!ostatus){
 		// get the followers of this person
 		final DefaultTaskInfo task1 = new DefaultTaskInfo(
 				uiText.FetchingFollowers(), false);
@@ -621,7 +664,8 @@ public class ProfileWindow extends AbstractWindow {
 					}
 
 				});
-
+		}
+		if (!ostatus){
 		// get the people who are being followed by this person
 		final DefaultTaskInfo task2 = new DefaultTaskInfo(
 				uiText.FetchingFollowing(), false);
@@ -688,7 +732,7 @@ public class ProfileWindow extends AbstractWindow {
 					}
 
 				});
-
+		}
 	}
 
 	private void addButtons() {
@@ -704,9 +748,9 @@ public class ProfileWindow extends AbstractWindow {
 		if (isFollowing == true) {
 			buttonPanel.add(unfollowButton);
 			// if it's the signed in user don't show follow button
-		} else if (isSignedinUser == false) {
+		} else if (isSignedinUser == false) {			 
 			buttonPanel.add(followButton);
-		}
+		}		
 	}
 
 	private void loadManager() {
