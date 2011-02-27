@@ -67,6 +67,7 @@ public interface UserInterfaceText extends Constants {
 	String FollowingPeople();
 	String DisplayName();
 	String FullName();
+	String Nickname();
 	String Birthday();
 	String Gender();
 	String Email();

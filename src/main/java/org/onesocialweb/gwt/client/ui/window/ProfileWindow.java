@@ -49,6 +49,7 @@ import org.onesocialweb.model.vcard4.EmailField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
 import org.onesocialweb.model.vcard4.NameField;
+import org.onesocialweb.model.vcard4.NicknameField;
 import org.onesocialweb.model.vcard4.NoteField;
 import org.onesocialweb.model.vcard4.Profile;
 import org.onesocialweb.model.vcard4.TelField;
@@ -529,6 +530,12 @@ public class ProfileWindow extends AbstractWindow {
 				String name = model.getName();
 				if (name != null && name.length() > 0)
 					addHTMLLabelRow(profile, uiText.FullName(), name);
+			}
+			
+			if (model.hasField(NicknameField.NAME)) {
+				String nickname = model.getNickname();
+				if (nickname != null && nickname.length() > 0)
+					addHTMLLabelRow(profile, uiText.Nickname(), nickname);
 			}
 
 			if (model.hasField(BirthdayField.NAME)) {
