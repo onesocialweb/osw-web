@@ -203,7 +203,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 				if ((recipientJID!=null) && (recipientJID.length()!=0)) {
 					
-				
+				 	//patch for commas in the inline shouts. 
+			
+					
 				service.getProfile(recipientJID,
 						new RequestCallback<Profile>() {
 
@@ -773,6 +775,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	}
 
 	private String extractRecipientJID(String recipientHref) {
+		String rec="";
 		if (recipientHref==null)
 			return "";
 		
@@ -782,10 +785,16 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				return "";
 			}
 			else {
-				return recipientHref.substring(5, i);
+				rec=recipientHref.substring(5, i);
+				if (rec.endsWith(","))
+					rec= rec.substring(0, rec.length()-1);
+				return rec;
 			}
 		}
 		else {
+			rec=recipientHref;
+			if (rec.endsWith(","))
+				rec= rec.substring(0, rec.length()-1);
 			return recipientHref;
 		}
 	}
@@ -836,6 +845,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 		if ((mentionJID!=null) && (mentionJID.length()>1)){
 			
+			if (mentionJID.endsWith(","))
+				mentionJID= mentionJID.substring(0,mentionJID.length()-1);
 		
 		service.getProfile(mentionJID,
 				new RequestCallback<Profile>() {
