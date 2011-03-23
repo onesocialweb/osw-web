@@ -54,6 +54,7 @@ import org.onesocialweb.model.vcard4.NoteField;
 import org.onesocialweb.model.vcard4.Profile;
 import org.onesocialweb.model.vcard4.TelField;
 import org.onesocialweb.model.vcard4.URLField;
+import org.onesocialweb.model.vcard4.XFeedField;
 import org.onesocialweb.xml.namespace.VCard4;
 
 import com.google.gwt.core.client.GWT;
@@ -130,6 +131,8 @@ public class ProfileWindow extends AbstractWindow {
 		model=p;
 		if ((p.hasField(VCard4.SOURCE_ELEMENT)) && (p.getSource()!=null) || (p.getSource().equals("ostatus")))
 			ostatus=true;
+		
+		
 
 	}
 
@@ -296,6 +299,7 @@ public class ProfileWindow extends AbstractWindow {
 		} else {
 			isFollowing = false;
 			following.setVisible(false);
+			addButtons();
 		}
 
 		buttonPanel.addStyleName("panel");
@@ -368,7 +372,39 @@ public class ProfileWindow extends AbstractWindow {
 				// temporarily disable the button
 				followButton.setEnabled(false);
 
-				OswServiceFactory.getService().subscribe(jid,
+				if (ostatus) {
+					String feedUrl=((XFeedField)model.getField(XFeedField.NAME)).getValue();
+					OswServiceFactory.getService().oStatusSubscribe(jid, feedUrl ,
+							new RequestCallback<Object>() {
+
+								@Override
+								public void onFailure() {
+									// enable the button again
+									followButton.setEnabled(true);
+									AlertDialog
+											.getInstance()
+											.showDialog(
+													uiText.AccountUnavailable(), uiText.Oops());
+								}
+
+								@Override
+								public void onSuccess(Object result) {
+									isFollowing = true;
+
+									// the following label
+									following.setVisible(true);
+
+									// enable the button again
+									followButton.setEnabled(true);
+									addButtons();
+
+									// show the manage tab
+									manage.setVisible(true);
+								}
+
+							});
+					
+				} else	{	OswServiceFactory.getService().subscribe(jid,
 						new RequestCallback<Object>() {
 
 							@Override
@@ -397,6 +433,7 @@ public class ProfileWindow extends AbstractWindow {
 							}
 
 						});
+				}
 			}
 		});
 
@@ -748,7 +785,7 @@ public class ProfileWindow extends AbstractWindow {
 		// Add buttons - removed unimplemented buttons
 		// buttonPanel.add(message);
 		// buttonPanel.add(chat);
-		if (isSignedinUser == false)
+		if ((isSignedinUser == false) && (!ostatus))
 			buttonPanel.add(shoutButton);
 
 		// check if this person is being followed and show the right actions
