@@ -202,9 +202,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				label.setTitle(uiText.ViewProfileOf() + recipientJID);
 
 				if ((recipientJID!=null) && (recipientJID.length()!=0)) {
+				
 					
-				 	//patch for commas in the inline shouts. 
-			
 					
 				service.getProfile(recipientJID,
 						new RequestCallback<Profile>() {
@@ -457,6 +456,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 		this.addMouseOverHandler(this);
 		this.addMouseOutHandler(this);
+
 
 		// Fetch the avatar image
 		service.getProfile(activity.getActor().getUri(),
@@ -914,5 +914,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			return false;
 		}
 	}
+	
+
 
 }
