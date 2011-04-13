@@ -34,6 +34,7 @@ import org.onesocialweb.gwt.client.util.OSWUrlBuilder;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
+import org.onesocialweb.model.cache.DomainCache;
 
 import com.google.code.gwt.storage.client.Storage;
 import com.google.gwt.core.client.GWT;
@@ -58,6 +59,10 @@ public class OswClient {
 	private AbstractApplication currentApplication;
 	private HashMap<String, MenuCommand> applicationCommands = new HashMap<String, MenuCommand>();
 	private HashMap<String, String> OSWLocales = new HashMap<String, String>();
+	private HashMap<String, String> domainCache= new HashMap<String, String>();
+	private boolean flag=false;
+	
+
 	private boolean sessionActive;
 
 	public static OswClient getInstance() {
@@ -79,6 +84,7 @@ public class OswClient {
 		// Start the XMPP connection
 		service.setup(getPreference("bosh_path"), getPreference("bosh_host"),
 				getPreference("xmpp_domain"));
+			
 
 		// Prepare the history manager (for browser history support)
 		History.addValueChangeHandler(new HistoryEventHandler());
@@ -95,12 +101,15 @@ public class OswClient {
 				return;
 			}
 		}
+		
 
 		// Could not login based on stored credentials,
 		// so we show the login dialog
 		if (!sessionActive) {
 			showLogin();
 		}
+								
+		
 	}
 
 	public OswService getService() {
@@ -184,6 +193,8 @@ public class OswClient {
 				}
 			}
 		});
+			
+		
 	}
 
 	private void login(String username, String password) {
@@ -197,6 +208,7 @@ public class OswClient {
 					@Override
 					public void onSuccess(Object result) {
 						createSession();
+												
 					}
 				});
 	}
@@ -393,6 +405,24 @@ public class OswClient {
 			logout();
 		}
 
+	}
+	
+	public HashMap<String, String> getDomainCache() {		
+		
+		return domainCache;
+	}
+	
+	public void setDomainCache(HashMap<String, String> c) {		
+		
+		domainCache=c;
+	}
+	
+	public boolean getFlag(){
+		return flag;
+	}
+	
+	public void setFlag(boolean b){
+		flag=b;
 	}
 
 }

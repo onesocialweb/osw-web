@@ -19,14 +19,10 @@
  */
 package org.onesocialweb.gwt.client.ui.widget.activity;
 
-import java.util.List;
-
 import org.onesocialweb.gwt.client.handler.ActivityButtonHandler;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.model.activity.ActivityEntry;
-import org.onesocialweb.model.atom.AtomReplyTo;
 
-import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.google.gwt.user.client.ui.Widget;
 
 public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
@@ -42,6 +38,9 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 
 		// hide the buttons (used as overlay on focus)
 		buttons.setVisible(false);
+		
+		
+		
 	}
 
 	
@@ -71,6 +70,7 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 		}
 	*/	
 
+		
 		ActivityItemView sa = new ActivityItemView(activityEntry, expand, unread);
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
@@ -84,6 +84,10 @@ public class InboxPanel extends AbstractActivityPanel<ActivityEntry> {
 					buttons.showLoggedInOptions();
 				} else {
 					buttons.hideLoggedInOptions();
+				}
+				//this is a horrible patch ...it's momentary
+				if (activityEntry.getActor().getUri().contains("identi.ca")) {
+					buttons.hideOStatusOptions();
 				}
 				
 				// make sure to remove the selected state. Mouseout is not

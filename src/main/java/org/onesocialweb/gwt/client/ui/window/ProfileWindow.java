@@ -247,6 +247,10 @@ public class ProfileWindow extends AbstractWindow {
 		if (isSignedinUser)
 			displaynamewrapper.add(you);
 		summary.add(displaynamewrapper);
+		
+		StyledLabel displayJid = new StyledLabel("displayname", jid);
+		displayJid.setText("("+jid+")");
+		summary.add(displayJid);
 
 		// Get tags and following status
 		String tags = "";
@@ -268,7 +272,7 @@ public class ProfileWindow extends AbstractWindow {
 		following.setVisible(false);
 		summary.add(following);
 
-		if (!ostatus){
+	
 		// Are we following this person ?
 		OswServiceFactory.getService().getSubscriptions(
 				OswServiceFactory.getService().getUserBareJID(),
@@ -296,11 +300,7 @@ public class ProfileWindow extends AbstractWindow {
 					}
 
 				});
-		} else {
-			isFollowing = false;
-			following.setVisible(false);
-			addButtons();
-		}
+	
 
 		buttonPanel.addStyleName("panel");
 
@@ -443,6 +443,40 @@ public class ProfileWindow extends AbstractWindow {
 
 				// temporarily disable the button
 				unfollowButton.setEnabled(false);
+				
+				if (ostatus) {
+					String feedUrl=((XFeedField)model.getField(XFeedField.NAME)).getValue();
+					OswServiceFactory.getService().oStatusUnsubscribe(jid, feedUrl ,
+							new RequestCallback<Object>() {
+
+								@Override
+								public void onFailure() {
+									// enable the button again
+									followButton.setEnabled(true);
+									AlertDialog
+											.getInstance()
+											.showDialog(
+													uiText.AccountUnavailable(), uiText.Oops());
+								}
+
+								@Override
+								public void onSuccess(Object result) {
+									isFollowing = false;
+
+									// the following label
+									following.setVisible(false);
+
+									// enable the button again
+									unfollowButton.setEnabled(true);
+									addButtons();
+
+									// show the manage tab
+									manage.setVisible(false);
+								}
+
+							});
+					
+				} else	{	
 
 				OswServiceFactory.getService().unsubscribe(jid,
 						new RequestCallback<Object>() {
@@ -472,6 +506,7 @@ public class ProfileWindow extends AbstractWindow {
 							}
 
 						});
+				}
 			}
 		});
 

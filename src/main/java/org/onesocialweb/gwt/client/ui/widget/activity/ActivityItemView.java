@@ -22,6 +22,7 @@ package org.onesocialweb.gwt.client.ui.widget.activity;
 import static org.onesocialweb.gwt.client.util.FormatHelper.getFormattedDate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,6 +52,7 @@ import org.onesocialweb.model.acl.AclSubject;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.atom.AtomReplyTo;
+import org.onesocialweb.model.cache.DomainCache;
 import org.onesocialweb.model.vcard4.Profile;
 
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -125,6 +127,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private String recipientActivityID = null;
 	private boolean commentNotification = false;
 	private StyledLabel repliesLabel=null;
+	private boolean ostatus;
 	
 	TextareaEdit edit;
 	
@@ -147,7 +150,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		statuswrapper2=statusw;
 	}
 
-	public ActivityItemView(final ActivityEntry activity, boolean expand, int unread) {
+	public ActivityItemView(final ActivityEntry activity, final boolean expand, final int unread) {
 						
 		if (activity.getTitle()==null)
 			activity.setTitle("");
@@ -164,6 +167,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	
 	//	final StyledFlowPanel statuswrapper1 = new StyledFlowPanel("wrapper2");
 		
+	
 		
 		StyledFlowPanel infowrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel editwrapper = new StyledFlowPanel("wrapper");
@@ -336,75 +340,46 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				
 		
 		commentswrapper.add(emptyIcon);
+		//check in the Domain cache if the domain name is OStatus
+		final String domain=getDomain(activity.getActor().getUri());
+		if ((OswClient.getInstance().getDomainCache().isEmpty()) && (!OswClient.getInstance().getFlag())){
+			service.getDomainCache(new RequestCallback<List<DomainCache>>() {
+
+				@Override
+				public void onFailure() {
+					// do nothing
+				}
+
+				@Override
+				public void onSuccess(List<DomainCache> result) {
+					// show display name
+					HashMap<String, String> cache= new HashMap<String, String>();
+					for (DomainCache c: result){						
+						cache.put(c.getDomain(), c.getProtocols());
+					}
+					OswClient.getInstance().setDomainCache(cache);
+					OswClient.getInstance().setFlag(true);
+										
+										
+					if (cache.containsKey(domain))
+							ostatus=true;
+					if (!ostatus)
+					addCommentsLogic(expand, unread);
+				}
+
+			});
+		}
+		else {
+			HashMap<String, String> cache=OswClient.getInstance().getDomainCache();						
+			if (cache.containsKey(domain))
+					ostatus=true;
+			
+			if (!ostatus)
+				addCommentsLogic(expand, unread);
+		}
 
 		if(!commentNotification) {
-			if(activity.hasReplies()) {
-				repliesLabel = new StyledLabel("replies-link", uiText.Comments() + ": " +
-						activity.getRepliesLink().getCount());
-				final StyledLabel notificationsLabel = new StyledLabel("replies-link", uiText.UnreadComments() + ": "+ unread); 
-				
-				if (expand){
-					commentPanel.compose(activity);
-					vpanel.add(commentPanel);
-					commentswrapper.setVisible(false);
-				}
-
-				repliesLabel.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						commentPanel.compose(activity);
-						vpanel.add(commentPanel);					
-						commentswrapper.setVisible(false);
-						unreadwrapper.setVisible(false);
-						AbstractActivityPanel<ActivityEntry> parent =(AbstractActivityPanel<ActivityEntry>) getParent();
-						parent.addExpanded(activity.getId());
-						parent.resetNotifications(activity.getId());	
-						notificationsLabel.setVisible(false);
-					}
-				});
-				commentswrapper.add(repliesLabel);	
-				replieswrapper.add(commentswrapper);
-				replieswrapper.setCellWidth(commentswrapper, "20px");					
-				
-				if (unread>0 && !expanded){
-					//add the comment image and a label with the number of new comments						
-					unreadwrapper.add(notificationsLabel);					
-					unreadwrapper.add(commentIcon);
-					replieswrapper.add(unreadwrapper);
-					replieswrapper.setCellWidth(unreadwrapper, "180px");					
-					notificationsLabel.addClickHandler(new ClickHandler() {
-						public void onClick(ClickEvent event) {
-							commentPanel.compose(activity);
-							vpanel.add(commentPanel);	
-							unreadwrapper.setVisible(false);
-							commentswrapper.setVisible(false);
-							AbstractActivityPanel<ActivityEntry> parent =(AbstractActivityPanel<ActivityEntry>) getParent();
-							parent.addExpanded(activity.getId());							
-							parent.resetNotifications(activity.getId());							
-						}
-					});
-				}
-								
-				
-			} else {
-				repliesLabel = new StyledLabel("replies-link", uiText.AddComments());
-				commentswrapper.add(repliesLabel);	
-				replieswrapper.add(commentswrapper);
-				
-				repliesLabel.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent event) {
-						commentPanel.compose(activity);						
-						commentswrapper.add(commentPanel);						
-						repliesLabel.setVisible(false);							
-						AbstractActivityPanel parent =(AbstractActivityPanel) getParent();						
-						parent.addExpanded(activity.getId());							
-						parent.resetNotifications(activity.getId());
-					}
-				});
-
-				
-					
-		
-		}
+			
 
 		String info = "";
 		info += getFormattedDate(activity.getPublished());
@@ -488,7 +463,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 							avatarwrapper.getElement().setAttribute("style",
 									"background-image: none;");
 							avatarwrapper.add(avatarImage);
-						}
+						}						
 					}
 
 				});
@@ -915,6 +890,83 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 	}
 	
+	private String getDomain(String jid){
+		try {
+			XmppURI ur =  XmppURI.jid(jid);
+			return ur.getHost();
+		}catch (RuntimeException e){
+			return null;
+		}
+	}
+	
+	private void addCommentsLogic(boolean expand, int unread){
+		if (activity.hasReplies()) {
+			repliesLabel = new StyledLabel("replies-link", uiText.Comments() + ": " +
+					activity.getRepliesLink().getCount());
+			final StyledLabel notificationsLabel = new StyledLabel("replies-link", uiText.UnreadComments() + ": "+ unread); 
+			
+			if (expand){
+				commentPanel.compose(activity);
+				vpanel.add(commentPanel);
+				commentswrapper.setVisible(false);
+			}
 
+			repliesLabel.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					commentPanel.compose(activity);
+					vpanel.add(commentPanel);					
+					commentswrapper.setVisible(false);
+					unreadwrapper.setVisible(false);
+					AbstractActivityPanel<ActivityEntry> parent =(AbstractActivityPanel<ActivityEntry>) getParent();
+					parent.addExpanded(activity.getId());
+					parent.resetNotifications(activity.getId());	
+					notificationsLabel.setVisible(false);
+				}
+			});
+			commentswrapper.add(repliesLabel);	
+			replieswrapper.add(commentswrapper);
+			replieswrapper.setCellWidth(commentswrapper, "20px");					
+			
+			if (unread>0 && !expanded){
+				//add the comment image and a label with the number of new comments						
+				unreadwrapper.add(notificationsLabel);					
+				unreadwrapper.add(commentIcon);
+				replieswrapper.add(unreadwrapper);
+				replieswrapper.setCellWidth(unreadwrapper, "180px");					
+				notificationsLabel.addClickHandler(new ClickHandler() {
+					public void onClick(ClickEvent event) {
+						commentPanel.compose(activity);
+						vpanel.add(commentPanel);	
+						unreadwrapper.setVisible(false);
+						commentswrapper.setVisible(false);
+						AbstractActivityPanel<ActivityEntry> parent =(AbstractActivityPanel<ActivityEntry>) getParent();
+						parent.addExpanded(activity.getId());							
+						parent.resetNotifications(activity.getId());							
+					}
+				});
+			}
+							
+			
+		} else if (!ostatus){
+			repliesLabel = new StyledLabel("replies-link", uiText.AddComments());
+			commentswrapper.add(repliesLabel);	
+			replieswrapper.add(commentswrapper);
+			
+			repliesLabel.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent event) {
+					commentPanel.compose(activity);						
+					commentswrapper.add(commentPanel);						
+					repliesLabel.setVisible(false);							
+					AbstractActivityPanel parent =(AbstractActivityPanel) getParent();						
+					parent.addExpanded(activity.getId());							
+					parent.resetNotifications(activity.getId());
+				}
+			});
+
+			
+				
+	
+		}
+	}
 
 }

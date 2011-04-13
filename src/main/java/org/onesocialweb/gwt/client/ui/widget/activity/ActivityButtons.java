@@ -146,6 +146,10 @@ public class ActivityButtons extends FlowPanel {
 		buttonDelete.setVisible(false);
 	}
 	
+	public void hideOStatusOptions(){
+		buttonComment.setVisible(false);
+	}
+	
 	private void disable() {
 		// temporarily disable the UI while processing request
 		buttonComment.setEnabled(false);
