@@ -52,6 +52,7 @@ import org.onesocialweb.model.acl.AclSubject;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.atom.AtomReplyTo;
+import org.onesocialweb.model.atom.AtomTo;
 import org.onesocialweb.model.cache.DomainCache;
 import org.onesocialweb.model.vcard4.Profile;
 
@@ -74,15 +75,15 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ActivityItemView extends FlowPanel implements MouseOverHandler,
-		HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
-	
+HasMouseOverHandlers, MouseOutHandler, HasMouseOutHandlers {
+
 	// internationalization
 	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
-	
+
 	private HTML infoLabel = new HTML();
 	private /*final*/ CommentPanel commentPanel = new CommentPanel();
 	private boolean editing=false;
-	
+
 
 	private StyledTooltipImage avatarImage = new StyledTooltipImage("", "link",
 			uiText.ViewProfile());
@@ -90,13 +91,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private StyledTooltipImage infoIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-info.png", "icon", "");
-	
+
 	TooltipPushButton buttonEdit = new TooltipPushButton(new Image(
 			OswClient.getInstance().getPreference("theme_folder")
-					+ "assets/i-edit.png"), "Edit Post");
-	
+			+ "assets/i-edit.png"), "Edit Post");
 
-	
+
+
 	private StyledTooltipImage emptyIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-empty.png", "icon", "");
@@ -105,139 +106,139 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private StyledTooltipImage statusIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-notavailable.png", "available",
-			"Visual indicator of user online presence");
+	"Visual indicator of user online presence");
 	private StyledTooltipImage commentIcon = new StyledTooltipImage(OswClient
 			.getInstance().getPreference("theme_folder")
 			+ "assets/i-comment.png", "icon", "");
 
 	private ActivityButtonHandler handler;
 	private final ActivityEntry activity;
-	
+
 	private StyledFlowPanel statusActivity = new StyledFlowPanel("statusActivity");
-	
-//	private StyledLabel author = new StyledLabel("link", "");
-	
+
+	//	private StyledLabel author = new StyledLabel("link", "");
+
 	protected final VerticalPanel vpanel = new VerticalPanel();
 	protected final HorizontalPanel replieswrapper = new HorizontalPanel();	
 	protected final StyledFlowPanel commentswrapper =  new StyledFlowPanel("author-wrapper");
 	protected final StyledFlowPanel unreadwrapper =  new StyledFlowPanel("author-wrapper");
 	/*final*/ StyledFlowPanel statuswrapper2 = new StyledFlowPanel("wrapper2");
 	StyledFlowPanel statuswrapper = new StyledFlowPanel("wrapper");		
-	StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");
-	private String recipientActivityID = null;
+	StyledFlowPanel authorWrapper = new StyledFlowPanel("author-wrapper");	
 	private boolean commentNotification = false;
+	private String recipientActivityID = null;
 	private StyledLabel repliesLabel=null;
 	private boolean ostatus;
-	
+
 	TextareaEdit edit;
-	
+
 	private boolean expanded;
 
 	public CommentPanel getCommentPanel() {
 		return commentPanel;
 	}
-	
-	
+
+
 	public StyledLabel getRepliesLabel(){
 		return repliesLabel;
 	}
-	
+
 	public StyledFlowPanel getStatusWrapper(){
 		return statuswrapper2;
 	}
-	
+
 	public void setStatusWrapper(StyledFlowPanel statusw){
 		statuswrapper2=statusw;
 	}
 
 	public ActivityItemView(final ActivityEntry activity, final boolean expand, final int unread) {
-						
+
 		if (activity.getTitle()==null)
 			activity.setTitle("");
-		
+
 		this.expanded=expand;
 		this.activity = activity;			
-		
+
 		// add the mouseOver handlers
 		this.addMouseOverHandler(this);
 		this.addMouseOutHandler(this);
-		
+
 		// Place the check above the text box using a vertical panel.
 		StyledFlowPanel flow = new StyledFlowPanel("contents");
-	
-	//	final StyledFlowPanel statuswrapper1 = new StyledFlowPanel("wrapper2");
-		
-	
-		
+
+		//	final StyledFlowPanel statuswrapper1 = new StyledFlowPanel("wrapper2");
+
+
+
 		StyledFlowPanel infowrapper = new StyledFlowPanel("wrapper");
 		StyledFlowPanel editwrapper = new StyledFlowPanel("wrapper");
-		
-		
-		StyledLabel author = new StyledLabel("link", activity.getActor().getName());
+
+		String strAuthor= activity.hasAuthors() ? activity.getAuthors().get(0).getUri() : activity.getActor().getName();
+		StyledLabel author = new StyledLabel("link", strAuthor );
 		authorWrapper.add(author);
 		final OswService service = OswServiceFactory.getService();
-		
+
 		edit =new TextareaEdit(this);
-		
+
 		boolean isComment=activity.getParentId()!=null && activity.getParentJID()!=null;
-        List<AtomReplyTo> recs=activity.getRecipients();
-        Iterator<AtomReplyTo> itRecipients=recs.iterator();
+		AtomReplyTo replyTo=activity.getInReplyTo();
 
-        while (itRecipients.hasNext()){
-                AtomReplyTo recipient=itRecipients.next();
-                if ((recipient.getHref()!=null)  && recipient.getHref().contains("?;node"))
-                        isComment=true;
-        }
+		if ((replyTo!=null) && (replyTo.getHref()!=null)  && replyTo.getHref().contains("?;node")) {
+			isComment=true;
+			recipientActivityID = extractRecipientActivityID(replyTo.getHref());
+			if(recipientActivityID != null) {
+				commentNotification = true;
+			}
+		}
 
 
-        if ((!isComment) && (activity.hasRecipients()) && (oneValidRecipient(activity.getRecipients()))) {
+		if ((!isComment) && (activity.hasRecipients()) && (oneValidRecipient(activity.getRecipients()))) {
 			authorWrapper.add(new StyledLabel("separator", " " + uiText.To() + " "));
-			Iterator<AtomReplyTo> recipients = activity.getRecipients().iterator();
+
+
+
+			Iterator<AtomTo> recipients = activity.getRecipients().iterator();
 			while (recipients.hasNext()) {
-				final AtomReplyTo recipient = recipients.next();
+				final AtomTo recipient = recipients.next();
 
-				recipientActivityID = extractRecipientActivityID(recipient.getHref());
-				if(recipientActivityID != null) {
-					commentNotification = true;
-				}
 
-				final String recipientJID = extractRecipientJID(recipient.getHref());
+				final String recipientJID = recipient.getUri();
 				final StyledLabel label = new StyledLabel("link", recipientJID);
 				label.setTitle(uiText.ViewProfileOf() + recipientJID);
 
 				if ((recipientJID!=null) && (recipientJID.length()!=0)) {
-				
-					
-					
-				service.getProfile(recipientJID,
-						new RequestCallback<Profile>() {
 
-							@Override
-							public void onFailure() {
-								// do nothing
+
+
+					service.getProfile(recipientJID,
+							new RequestCallback<Profile>() {
+
+						@Override
+						public void onFailure() {
+							// do nothing
+						}
+
+						@Override
+						public void onSuccess(Profile result) {
+							// show display name
+							final String fullName = result.getFullName();
+							if (fullName != null && fullName.length() > 0) {
+								label.setText(fullName);
 							}
 
-							@Override
-							public void onSuccess(Profile result) {
-								// show display name
-								final String fullName = result.getFullName();
-								if (fullName != null && fullName.length() > 0) {
-									label.setText(fullName);
-								}
+						}
 
-							}
+					});
 
-						});
-				
 				}
 
 				label.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent event) {
 						// get the app instance from the session manager
 						AbstractApplication app = OswClient.getInstance()
-								.getCurrentApplication();
+						.getCurrentApplication();
 						ProfileWindow profileWindow = (ProfileWindow) app
-								.addWindow(ProfileWindow.class.toString(), 1);
+						.addWindow(ProfileWindow.class.toString(), 1);
 						profileWindow.setJID(recipientJID);
 						profileWindow.show();
 					}
@@ -249,37 +250,37 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				}
 			}
 		}
-        
-        if (!isComment){       
-        buttonEdit.addClickHandler(new ClickHandler(){
-        	public void onClick(ClickEvent event){  
-        		if (!editing){
-        			statuswrapper.remove(statuswrapper2);
-        			statuswrapper2= new StyledFlowPanel("wrapper2");
-        			statuswrapper2.add(authorWrapper);
-        			statuswrapper.add(statuswrapper2);
-        			edit.setText(activity.getTitle());
-        			statuswrapper.add(edit);
-        			editing=true;
-        		}
-        		else {
-        			statuswrapper.remove(statuswrapper2);
-        			statuswrapper2= new StyledFlowPanel("wrapper2");
-        			statuswrapper2.add(authorWrapper);        			
-        			formatContent(statuswrapper2, activity.getTitle());   
-        			statuswrapper.add(statuswrapper2);
-        			statuswrapper.remove(edit);
-        			editing=false;
-        		}
-        		
-        	}
-        	});
-        }
-        statuswrapper.add(statusIcon);
+
+		if (!isComment){       
+			buttonEdit.addClickHandler(new ClickHandler(){
+				public void onClick(ClickEvent event){  
+					if (!editing){
+						statuswrapper.remove(statuswrapper2);
+						statuswrapper2= new StyledFlowPanel("wrapper2");
+						statuswrapper2.add(authorWrapper);
+						statuswrapper.add(statuswrapper2);
+						edit.setText(activity.getTitle());
+						statuswrapper.add(edit);
+						editing=true;
+					}
+					else {
+						statuswrapper.remove(statuswrapper2);
+						statuswrapper2= new StyledFlowPanel("wrapper2");
+						statuswrapper2.add(authorWrapper);        			
+						formatContent(statuswrapper2, activity.getTitle());   
+						statuswrapper.add(statuswrapper2);
+						statuswrapper.remove(edit);
+						editing=false;
+					}
+
+				}
+			});
+		}
+		statuswrapper.add(statusIcon);
 		statuswrapper2.add(authorWrapper);
 		statuswrapper.add(statuswrapper2);
-	
-		
+
+
 		editwrapper.add(buttonEdit);
 		infowrapper.add(infoIcon);		
 		infowrapper.add(infoLabel);
@@ -295,23 +296,23 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		avatarwrapper.getElement().setAttribute(
 				"style",
 				"background-image: url('"
-						+ OswClient.getInstance().getPreference("theme_folder")
-						+ "assets/avatar-loader.gif');");
+				+ OswClient.getInstance().getPreference("theme_folder")
+				+ "assets/avatar-loader.gif');");
 		hpanel.add(flow);
-		if ((activity.getActor().getUri().equals(OswServiceFactory.getService().getUserBareJID())) && !(isComment)){
+		if ((strAuthor.equals(OswServiceFactory.getService().getUserBareJID())) && !(isComment)){
 			hpanel.add(editwrapper);
 			hpanel.setCellWidth(editwrapper, "25px");
 		}
-		
+
 		hpanel.setCellWidth(avatarwrapper, "40px");
-		
+
 
 		// display who can see your own items
 		List<String> visibility = new ArrayList<String>();
 
-		if (activity.getActor().getUri().equals(
+		if (strAuthor.equals(
 				OswServiceFactory.getService().getUserBareJID())) {
-			
+
 			// show the acl rule
 			for (AclRule rule : activity.getAclRules()) {
 				for (AclAction action : rule.getActions(AclAction.ACTION_VIEW,
@@ -327,59 +328,61 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 					}
 				}
 			}
-			
+
 			// and add a special style to show this is your own item
 			addStyleName("isOwner");
 		}
 
-				
+
 		formatContent(statuswrapper2,  activity.getTitle());
 		statuswrapper2.setVisible(true);
 		statuswrapper.add(statuswrapper2);
-		
-				
-		
+
+
+
 		commentswrapper.add(emptyIcon);
 		//check in the Domain cache if the domain name is OStatus
-		final String domain=getDomain(activity.getActor().getUri());
-		if ((OswClient.getInstance().getDomainCache().isEmpty()) && (!OswClient.getInstance().getFlag())){
-			service.getDomainCache(new RequestCallback<List<DomainCache>>() {
-
-				@Override
-				public void onFailure() {
-					// do nothing
-				}
-
-				@Override
-				public void onSuccess(List<DomainCache> result) {
-					// show display name
-					HashMap<String, String> cache= new HashMap<String, String>();
-					for (DomainCache c: result){						
-						cache.put(c.getDomain(), c.getProtocols());
-					}
-					OswClient.getInstance().setDomainCache(cache);
-					OswClient.getInstance().setFlag(true);
-										
-										
-					if (cache.containsKey(domain))
-							ostatus=true;
-					if (!ostatus)
-					addCommentsLogic(expand, unread);
-				}
-
-			});
-		}
-		else {
-			HashMap<String, String> cache=OswClient.getInstance().getDomainCache();						
-			if (cache.containsKey(domain))
-					ostatus=true;
-			
-			if (!ostatus)
-				addCommentsLogic(expand, unread);
-		}
-
 		if(!commentNotification) {
-			
+
+
+			final String domain=getDomain(strAuthor);
+			if ((OswClient.getInstance().getDomainCache().isEmpty()) && (!OswClient.getInstance().getFlag())){
+				service.getDomainCache(new RequestCallback<List<DomainCache>>() {
+
+					@Override
+					public void onFailure() {
+						// do nothing
+					}
+
+					@Override
+					public void onSuccess(List<DomainCache> result) {
+						// show display name
+						HashMap<String, String> cache= new HashMap<String, String>();
+						for (DomainCache c: result){						
+							cache.put(c.getDomain(), c.getProtocols());
+						}
+						OswClient.getInstance().setDomainCache(cache);
+						OswClient.getInstance().setFlag(true);
+
+
+						if (cache.containsKey(domain))
+							ostatus=true;
+						if (!ostatus)
+							addCommentsLogic(expand, unread);
+					}
+
+				});
+			}
+			else {
+				HashMap<String, String> cache=OswClient.getInstance().getDomainCache();						
+				if (cache.containsKey(domain))
+					ostatus=true;
+
+				if (!ostatus)
+					addCommentsLogic(expand, unread);
+			}
+		}
+
 
 		String info = "";
 		info += getFormattedDate(activity.getPublished());
@@ -387,12 +390,10 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			info += " - " + uiText.VisibleTo() + " " + FormatHelper.implode(visibility, ", ");
 		// if (location != "") info += " - From: " + location;
 		// if (tags != "") info += " - Tagged: " + tags;
-		
-		if(commentNotification)
-			info += " - This is a comment to a previous post";
 
+		
 		infoLabel.setText(info);
-		author.setTitle(uiText.ViewProfileOf() + " " + activity.getActor().getUri());
+		author.setTitle(uiText.ViewProfileOf() + " " + strAuthor);
 
 		// check for any attachments
 		for (int i = 0; i < activity.getObjects().size(); i++) {
@@ -404,7 +405,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				addLinkAttachment(activity.getObjects().get(i));
 			}
 		}
-		
+
 		statusActivity.add(hpanel);
 		add(statusActivity);
 
@@ -412,8 +413,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		avatarImage.setStyleName("avatar");
 		infoLabel.setStyleName("info");
 		addStyleName("statusActivityWrapper");
-		
-		
+
+
 
 		// handlers
 		author.addClickHandler(new ClickHandler() {
@@ -421,10 +422,11 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			public void onClick(ClickEvent event) {
 				// get the app instance from the session manager
 				AbstractApplication app = OswClient.getInstance()
-						.getCurrentApplication();
+				.getCurrentApplication();
 				ProfileWindow profileWindow = (ProfileWindow) app.addWindow(
 						ProfileWindow.class.toString(), 1);
-				profileWindow.setJID(activity.getActor().getUri());
+				String strAuthor= activity.hasAuthors() ? activity.getAuthors().get(0).getUri() : activity.getActor().getUri();
+				profileWindow.setJID(strAuthor);
 				profileWindow.show();
 			}
 		});
@@ -434,46 +436,46 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 
 		// Fetch the avatar image
-		service.getProfile(activity.getActor().getUri(),
+		service.getProfile(strAuthor,
 				new RequestCallback<Profile>() {
 
-					@Override
-					public void onFailure() {
-						// Do nothing
-						avatarImage.setUrl(OswClient.getInstance()
-								.getPreference("theme_folder")
-								+ "assets/default-avatar.png");
-						avatarwrapper.getElement().setAttribute("style",
-								"background-image: none;");
-						avatarwrapper.add(avatarImage);
-					}
+			@Override
+			public void onFailure() {
+				// Do nothing
+				avatarImage.setUrl(OswClient.getInstance()
+						.getPreference("theme_folder")
+						+ "assets/default-avatar.png");
+				avatarwrapper.getElement().setAttribute("style",
+				"background-image: none;");
+				avatarwrapper.add(avatarImage);
+			}
 
-					@Override
-					public void onSuccess(Profile result) {
-						String url = result.getPhotoUri();
-						if (url != null && url.length() > 0) {
-							avatarImage.setUrl(url);
-							avatarwrapper.getElement().setAttribute("style",
-									"background-image: none;");
-							avatarwrapper.add(avatarImage);
-						} else {
-							avatarImage.setUrl(OswClient.getInstance()
-									.getPreference("theme_folder")
-									+ "assets/default-avatar-big.png");
-							avatarwrapper.getElement().setAttribute("style",
-									"background-image: none;");
-							avatarwrapper.add(avatarImage);
-						}						
-					}
+			@Override
+			public void onSuccess(Profile result) {
+				String url = result.getPhotoUri();
+				if (url != null && url.length() > 0) {
+					avatarImage.setUrl(url);
+					avatarwrapper.getElement().setAttribute("style",
+					"background-image: none;");
+					avatarwrapper.add(avatarImage);
+				} else {
+					avatarImage.setUrl(OswClient.getInstance()
+							.getPreference("theme_folder")
+							+ "assets/default-avatar-big.png");
+					avatarwrapper.getElement().setAttribute("style",
+					"background-image: none;");
+					avatarwrapper.add(avatarImage);
+				}						
+			}
 
-				});
+		});
 
 		// Display the presence
-		if (activity.getActor().getUri().equals(service.getUserBareJID())) {
+		if (strAuthor.equals(service.getUserBareJID())) {
 			setPresence(service.getPresence());
 		} else {
 			final RosterItem rosterItem = service.getRoster().getItem(
-					activity.getActor().getUri());
+					strAuthor);
 			if (rosterItem != null) {
 				setPresence(rosterItem.getPresence());
 				rosterItem.registerEventHandler(new Observer<RosterEvent>() {
@@ -486,11 +488,11 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				});
 			}
 		}
-		}
-				
+
+
 	}
 
-	
+
 
 	public ActivityEntry getActivity() {
 		return activity;
@@ -518,7 +520,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		} else if (event.getRelativeX(this.getElement()) > this.getElement()
 				.getOffsetWidth()
 				|| event.getRelativeY(this.getElement()) > this.getElement()
-						.getOffsetHeight()) {
+				.getOffsetHeight()) {
 			deselect();
 		}
 	}
@@ -536,11 +538,11 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		super.onLoad();
 
 	}
-	
+
 	public void removeSelect() {
 		statusActivity.removeStyleName("selected");
 	}
-	
+
 	public void addSelect() {
 		statusActivity.addStyleName("selected");
 	}
@@ -554,12 +556,12 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		statusActivity.removeStyleName("selected");
 		handler.handleHide();
 	}
-	
+
 
 	private void showAttachments() {
 		// addPhotoAttachment("http://www.iwatchstuff.com/2008/05/30/emily-the-strange-movie.jpg");
 	}
-	
+
 	public boolean isExpanded() {
 		return expanded;
 	}
@@ -652,7 +654,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		FlowPanel attachmentFlow = new FlowPanel();
 		HTML movie = new HTML();
 		movie
-				.setHTML("<embed src='http://vimeo.com/moogaloop.swf?clip_id=7659259&amp;server=vimeo.com&amp;show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=00ADEF&amp;fullscreen=1' type='application/x-shockwave-flash' allowfullscreen='true' allowscriptaccess='always' width='200' height='150'></embed>");
+		.setHTML("<embed src='http://vimeo.com/moogaloop.swf?clip_id=7659259&amp;server=vimeo.com&amp;show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=00ADEF&amp;fullscreen=1' type='application/x-shockwave-flash' allowfullscreen='true' allowscriptaccess='always' width='200' height='150'></embed>");
 
 		attachment.add(attachmentIcon);
 		attachment.add(attachmentFlow);
@@ -669,7 +671,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				StyledFlowPanel attachment = new StyledFlowPanel("wrapper");
 				StyledTooltipImage attachmentIcon = new StyledTooltipImage(
 						OswClient.getInstance().getPreference("theme_folder")
-								+ "assets/i-attachment.png", "icon", "");
+						+ "assets/i-attachment.png", "icon", "");
 				FlowPanel attachmentFlow = new FlowPanel();
 
 				attachment.add(attachmentIcon);
@@ -691,47 +693,47 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 	private void setPresence(Presence presence) {
 		if (presence.equals(Presence.chat)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
-					"theme_folder")
-					+ "assets/i-chatty.png");
+			"theme_folder")
+			+ "assets/i-chatty.png");
 			statusIcon.setTitle("In a chatty mood!");
 		} else if (presence.equals(Presence.away)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
-					"theme_folder")
-					+ "assets/i-away.png");
+			"theme_folder")
+			+ "assets/i-away.png");
 			statusIcon.setTitle("Away");
 		} else if (presence.equals(Presence.dnd)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
-					"theme_folder")
-					+ "assets/i-dnd.png");
+			"theme_folder")
+			+ "assets/i-dnd.png");
 			statusIcon.setTitle("Do not disturb");
 		} else if (presence.equals(Presence.xa)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
-					"theme_folder")
-					+ "assets/i-xaway.png");
+			"theme_folder")
+			+ "assets/i-xaway.png");
 			statusIcon.setTitle("Away for a while");
 		} else if (presence.equals(Presence.available)) {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
-					"theme_folder")
-					+ "assets/i-available.png");
+			"theme_folder")
+			+ "assets/i-available.png");
 			statusIcon.setTitle("Online");
 		} else {
 			statusIcon.setUrl(OswClient.getInstance().getPreference(
-					"theme_folder")
-					+ "assets/i-notavailable.png");
+			"theme_folder")
+			+ "assets/i-notavailable.png");
 			statusIcon.setTitle("Not available");
 		}
 	}
-	
+
 	public void formatContent(StyledFlowPanel statuswrapper, String activityContent){
-		
-		
-		
+
+
+
 		final OswService service = OswServiceFactory.getService();
-		
+
 		statuswrapper.add(new HTML(" - "));
 		//add the activity context, with formatted links (clickable) and mentions	
 		if(activityContent.indexOf("http://")>=0 || activityContent.indexOf("https://")>=0 || activityContent.indexOf("@")>=0) {
-		String[] tokens = activityContent.split("\\s+");
+			String[] tokens = activityContent.split("\\s+");
 			for(int i=0; i<tokens.length; i++) {
 				String token = tokens[i];
 				if(token.startsWith("http://") || token.startsWith("https://")) {
@@ -741,19 +743,19 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				} else {
 					statuswrapper.add(formatText(token, i));
 				}
-					
+
 			}
 		} else {
 			statuswrapper.add(formatText(activityContent, 0));
 		}
-		
+
 	}
 
 	private String extractRecipientJID(String recipientHref) {
 		String rec="";
 		if (recipientHref==null)
 			return "";
-		
+
 		if(recipientHref.startsWith("xmpp:")) {
 			int i = recipientHref.indexOf("?");
 			if(i == -1) {
@@ -778,8 +780,8 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 
 		if (recipientHref==null)		
 			return null; 
-		
-		
+
+
 		if(recipientHref.startsWith("xmpp:")) {
 			int i = recipientHref.indexOf("item=");
 			if(i == -1) {
@@ -794,93 +796,93 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 		}
 
 	}
-	
-	
+
+
 	private HTML formatLink(String link, int index) {
-		
+
 		String formattedLink = "<a href='" + link + "' target='_blank'>" + link + "</a>";
-		
+
 		HTML htmlFragment = new HTML();
 		if(index == 0) {
 			htmlFragment.setHTML(formattedLink);
 		} else {
 			htmlFragment.setHTML(" " + formattedLink);
 		}
-		
+
 		return htmlFragment;
-	
+
 	}
-	
+
 	private StyledLabel formatMention(OswService service, String mentionJID, int index) {
-		
+
 		final StyledLabel label = new StyledLabel("link", index==0?"@"+mentionJID:" @"+mentionJID);
 		final String JID = mentionJID;
 		final int fIndex = index;
 		label.setTitle(uiText.ViewProfileOf() + mentionJID);
 
 		if ((mentionJID!=null) && (mentionJID.length()>1)){
-			
+
 			if (mentionJID.endsWith(","))
 				mentionJID= mentionJID.substring(0,mentionJID.length()-1);
-		
-		service.getProfile(mentionJID,
-				new RequestCallback<Profile>() {
 
-					@Override
-					public void onFailure() {
-						// do nothing
+			service.getProfile(mentionJID,
+					new RequestCallback<Profile>() {
+
+				@Override
+				public void onFailure() {
+					// do nothing
+				}
+
+				@Override
+				public void onSuccess(Profile result) {
+					// show display name
+					final String fullName = result.getFullName();
+					if (fullName != null && fullName.length() > 0) {
+						label.setText(fIndex==0?"@"+fullName:" @"+fullName);
 					}
 
-					@Override
-					public void onSuccess(Profile result) {
-						// show display name
-						final String fullName = result.getFullName();
-						if (fullName != null && fullName.length() > 0) {
-							label.setText(fIndex==0?"@"+fullName:" @"+fullName);
-						}
+				}
 
-					}
-
-				});
+			});
 
 		}
 		label.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				// get the app instance from the session manager
 				AbstractApplication app = OswClient.getInstance()
-						.getCurrentApplication();
+				.getCurrentApplication();
 				ProfileWindow profileWindow = (ProfileWindow) app
-						.addWindow(ProfileWindow.class.toString(), 1);
+				.addWindow(ProfileWindow.class.toString(), 1);
 				profileWindow.setJID(JID);
 				profileWindow.show();
 			}
 		});
-		
+
 		return label;
-	
+
 	}
-	
+
 	private HTML formatText(String text, int index) {
-		
+
 		HTML htmlFragment = new HTML();
 		if(index == 0) {
 			htmlFragment.setText(text);
 		} else {
 			htmlFragment.setText(" " + text);
 		}
-		
+
 		return htmlFragment;
 	}
-	
-	private boolean oneValidRecipient(List<AtomReplyTo> recipients){
-		for (AtomReplyTo rec: recipients){
-			if ((rec.getHref()!=null) && (rec.getHref().length()!=0))
-				if (isValidJID(rec.getHref()))
+
+	private boolean oneValidRecipient(List<AtomTo> recipients){
+		for (AtomTo rec: recipients){
+			if ((rec.getUri()!=null) && (rec.getUri().length()!=0))
+				if (isValidJID(rec.getUri()))
 					return true;
 		}
 		return false;
 	}
-	
+
 	private boolean isValidJID(String jid){
 		try {
 			XmppURI ur =  XmppURI.jid(jid);
@@ -889,7 +891,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			return false;
 		}
 	}
-	
+
 	private String getDomain(String jid){
 		try {
 			XmppURI ur =  XmppURI.jid(jid);
@@ -898,13 +900,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			return null;
 		}
 	}
-	
+
 	private void addCommentsLogic(boolean expand, int unread){
 		if (activity.hasReplies()) {
 			repliesLabel = new StyledLabel("replies-link", uiText.Comments() + ": " +
 					activity.getRepliesLink().getCount());
 			final StyledLabel notificationsLabel = new StyledLabel("replies-link", uiText.UnreadComments() + ": "+ unread); 
-			
+
 			if (expand){
 				commentPanel.compose(activity);
 				vpanel.add(commentPanel);
@@ -926,7 +928,7 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 			commentswrapper.add(repliesLabel);	
 			replieswrapper.add(commentswrapper);
 			replieswrapper.setCellWidth(commentswrapper, "20px");					
-			
+
 			if (unread>0 && !expanded){
 				//add the comment image and a label with the number of new comments						
 				unreadwrapper.add(notificationsLabel);					
@@ -945,13 +947,13 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 					}
 				});
 			}
-							
-			
+
+
 		} else if (!ostatus){
 			repliesLabel = new StyledLabel("replies-link", uiText.AddComments());
 			commentswrapper.add(repliesLabel);	
 			replieswrapper.add(commentswrapper);
-			
+
 			repliesLabel.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
 					commentPanel.compose(activity);						
@@ -963,9 +965,9 @@ public class ActivityItemView extends FlowPanel implements MouseOverHandler,
 				}
 			});
 
-			
-				
-	
+
+
+
 		}
 	}
 

@@ -42,10 +42,11 @@ import org.onesocialweb.gwt.util.ListModel;
 import org.onesocialweb.model.acl.AclAction;
 import org.onesocialweb.model.acl.AclRule;
 import org.onesocialweb.model.acl.AclSubject;
-import org.onesocialweb.model.activity.ActivityActor;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.activity.ActivityObject;
 import org.onesocialweb.model.activity.ActivityVerb;
+import org.onesocialweb.model.atom.AtomPerson;
+import org.onesocialweb.model.atom.AtomReplyTo;
 import org.onesocialweb.model.vcard4.Profile;
 
 import com.google.gwt.core.client.GWT;
@@ -71,7 +72,7 @@ public class CommentPanel extends Composite {
 
 	private final InternalComponentListener componentListener = new InternalComponentListener();
 	
-	ActivityActor actor=null;
+	AtomPerson activityAuthor=null;
 
 	public CommentPanel() {
 	}
@@ -152,7 +153,8 @@ public class CommentPanel extends Composite {
 				replies.setModel(repliesModel);
 			}
 		} else {
-			replies.setModel(new GwtReplies(parentActivity.getId(), parentActivity.getActor().getUri()));
+			String author = parentActivity.hasAuthors() ? parentActivity.getAuthors().get(0).getUri() : parentActivity.getActor().getUri();
+			replies.setModel(new GwtReplies(parentActivity.getId(), author));
 		}
 				
 		
@@ -235,8 +237,13 @@ public class CommentPanel extends Composite {
 		entry.addVerb(service.getActivityFactory().verb(ActivityVerb.POST));
 		entry.addObject(object);
 		entry.setPublished(now);
-		entry.setParentId(parentActivity.getId());
-		entry.setParentJID(parentActivity.getActor().getUri());
+		String parentAuthor = parentActivity.hasAuthors() ? parentActivity.getAuthors().get(0).getUri() : parentActivity.getActor().getUri();
+		
+		AtomReplyTo replyTo = service.getAtomFactory().reply(parentActivity.getId(), "xmpp:"+parentAuthor+"?;node=urn:xmpp:microblog:0;item="+parentActivity.getId(), null, null);
+		entry.setInReplyTo(replyTo);
+		
+		entry.setParentId(parentActivity.getId());	
+		entry.setParentJID(parentAuthor);
 		
 		
 		// add attachments if there are any
@@ -276,10 +283,11 @@ public class CommentPanel extends Composite {
 			}
 
 		});
-		actor = service.getActivityFactory().actor();		
-		actor.setUri(service.getUserBareJID());
 		
-		entry.setActor(actor);			
+		activityAuthor = service.getAtomFactory().person();
+		activityAuthor.setUri(service.getUserBareJID());
+		
+		entry.addAuthor(activityAuthor);		
 		
 		GwtReplies model = (GwtReplies)this.getReplies().getModel();
 		service.getProfile(service.getUserBareJID(),
@@ -295,7 +303,7 @@ public class CommentPanel extends Composite {
 						// show display name
 						final String fullName = result.getFullName();
 						if (fullName != null && fullName.length() > 0) {
-							actor.setName(fullName);
+							activityAuthor.setName(fullName);
 						}
 
 					}

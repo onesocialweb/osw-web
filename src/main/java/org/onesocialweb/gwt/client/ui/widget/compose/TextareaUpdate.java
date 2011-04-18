@@ -50,9 +50,9 @@ public class TextareaUpdate extends FlowPanel {
 				if (keyCode == at) {
 
 				}
-				TextareaUpdate tau= (TextareaUpdate)event.getSource();
-				if (((TextareaUpdate)event.getSource()).getText().length()>=255)
-					((TextareaUpdate)event.getSource()).getText().substring(0, 255);
+				TextArea ta= (TextArea)event.getSource();
+				if (ta.getText().length()>=255)
+					ta.getText().substring(0, 255);
 			}
 		});
 

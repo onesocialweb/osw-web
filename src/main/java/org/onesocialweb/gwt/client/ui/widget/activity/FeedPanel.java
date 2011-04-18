@@ -50,7 +50,7 @@ public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 		if (activityEntry.getId()==null)
 			return null;
 
-		if (activityEntry.getActor()==null)
+		if ((!activityEntry.hasAuthors()) && (activityEntry.getActor()==null))
 			return null;
 		
 		//check that none of the recipients uri is malformed. This can be introduce in the command line console and
@@ -71,11 +71,12 @@ public class FeedPanel extends AbstractActivityPanel<ActivityEntry> {
 		sa.setButtonHandler(new ActivityButtonHandler() {
 			public void handleShow(int top, ActivityItemView sa) {
 				
+				String author= activityEntry.hasAuthors() ? activityEntry.getAuthors().get(0).getUri() : activityEntry.getActor().getUri();
 				// pass the Id for editing, deleting etc.
 				buttons.setActivityId(activityEntry.getId());
 				
 				// only show options like edit and delete for own items
-				if (activityEntry.getActor().getUri().equals(OswServiceFactory.getService().getUserBareJID())) {
+				if (author.equals(OswServiceFactory.getService().getUserBareJID())) {
 					buttons.showLoggedInOptions();
 				} else {
 					buttons.hideLoggedInOptions();

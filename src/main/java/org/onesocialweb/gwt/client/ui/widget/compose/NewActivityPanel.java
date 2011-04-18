@@ -134,7 +134,7 @@ public class NewActivityPanel extends Composite {
 
 		// Add recipients if there are any
 		for (String recipient : shoutAttachmentPanel.getRecipients()) {
-			entry.addRecipient(atomFactory.reply(null, recipient, null, null));
+			entry.addRecipient(atomFactory.recipient(recipient));
 		}
 
 		// setup access control
