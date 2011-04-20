@@ -38,6 +38,7 @@ import org.onesocialweb.gwt.client.ui.widget.activity.FeedPanel;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
+import org.onesocialweb.gwt.service.Roster;
 import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
 import org.onesocialweb.gwt.service.Stream;
@@ -559,6 +560,7 @@ public class ProfileWindow extends AbstractWindow {
 		StyledLabel profileLabel = new StyledLabel("grouplabel", uiText.Profile());
 		StyledLabel profileInstruction = new StyledLabel("instruction", "");
 		details.add(sectionProfile);
+		
 		sectionProfile.add(profileLabel);
 		sectionProfile.add(profileInstruction);
 		sectionProfile.add(profile);
@@ -862,7 +864,6 @@ public class ProfileWindow extends AbstractWindow {
 		sectionLists.add(listSelector);
 
 		manage.add(sectionLists);
-
 		// Add the relations
 		/*
 		 * StyledFlowPanel sectionRelations = new StyledFlowPanel("section");
