@@ -22,8 +22,9 @@ import java.util.Set;
 
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
-import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.task.TaskMonitor;
+import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
@@ -43,14 +44,13 @@ public class ListSelector extends FlowPanel {
 
 	// internationalization
 	private UserInterfaceText uiText = (UserInterfaceText) GWT.create(UserInterfaceText.class);
-	
+
 	private StyledFlowPanel wrapper = new StyledFlowPanel("wrapper");
 
-	private final RosterItem rosterItem;
+	private  RosterItem rosterItem;
 	private List<String> listed = null;
 
 	public ListSelector(final RosterItem rosterItem) {
-
 		this.rosterItem = rosterItem;
 
 		addStyleName("listselector");
@@ -66,16 +66,16 @@ public class ListSelector extends FlowPanel {
 		// get all available lists for your complete roster
 		OswService service = OswServiceFactory.getService();
 		Set<String> groups = service.getRoster().getGroups();
-		
-		
+
 
 		// try to get all the lists this person is on
-		try {
-			listed = rosterItem.getGroups();
-		} catch (NullPointerException e) {
-			listed = new ArrayList<String>();
-		}
 
+		if (this.rosterItem== null) {
+			listed= new ArrayList<String>();
+		} else {
+			listed = rosterItem.getGroups();
+		}
+		
 		// add all lists as checkboxes
 		if (groups.size() > 0) {
 			for (String list : groups) {
@@ -94,26 +94,30 @@ public class ListSelector extends FlowPanel {
 			}
 		});
 
+
 	}
 
 	public void addCheckbox(String list, Boolean value) {
 
+
 		final CheckBox checkbox = new CheckBox(list);
 		StyledFlowPanel fix = new StyledFlowPanel("fix");
 		checkbox.addStyleName("checkbox");
-
+		
 		// manage checks and unchecks
 		checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 
+				try {
 				// is the item is checked?
 				if (event.getValue() == true
 						&& !listed.contains(checkbox.getText()) && checkbox.getText()!=null  && checkbox.getText().length()!=0)  {
 					// set the values
 					listed.add(checkbox.getText());
-					rosterItem.setGroups(listed);
+					if (rosterItem!=null) 
+						rosterItem.setGroups(listed);
 					// disable during processing
 					checkbox.setEnabled(false);
 
@@ -123,30 +127,33 @@ public class ListSelector extends FlowPanel {
 					TaskMonitor.getInstance().addTask(task);
 
 					// save new state
-					rosterItem.save(new RequestCallback<RosterItem>() {
+					if (rosterItem!=null) {
+						rosterItem.save(new RequestCallback<RosterItem>() {
 
-						@Override
-						public void onFailure() {
-							// return to original state and notify user
-							checkbox.setEnabled(true);
-							checkbox.setValue(true);
-							task.complete("Could not add person to list.",
-									Status.failure);
-						}
+							@Override
+							public void onFailure() {
+								// return to original state and notify user
+								checkbox.setEnabled(true);
+								checkbox.setValue(true);
+								task.complete("Could not add person to list.",
+										Status.failure);
+							}
 
-						@Override
-						public void onSuccess(RosterItem result) {
-							// enable the checkbox again
-							checkbox.setEnabled(true);
-							task.complete("", Status.succes);
-						}
+							@Override
+							public void onSuccess(RosterItem result) {
+								// enable the checkbox again
+								checkbox.setEnabled(true);
+								task.complete("", Status.succes);
+							}
 
-					});
+						});
+					}
 				} else if (event.getValue() == false
 						&& listed.contains(checkbox.getText())) {
 					// set the values
 					listed.remove(checkbox.getText());
-					rosterItem.setGroups(listed);
+					if (rosterItem != null)
+						rosterItem.setGroups(listed);
 					// disable during processing
 					checkbox.setEnabled(false);
 
@@ -156,33 +163,42 @@ public class ListSelector extends FlowPanel {
 					TaskMonitor.getInstance().addTask(task);
 
 					// save new state
-					rosterItem.save(new RequestCallback<RosterItem>() {
+					if (rosterItem!=null) {
+						rosterItem.save(new RequestCallback<RosterItem>() {
 
-						@Override
-						public void onFailure() {
-							// return to original state and notify user
-							checkbox.setEnabled(true);
-							checkbox.setValue(true);
-							task.complete(
-									"Could not remove person from the list.",
-									Status.failure);
-						}
+							@Override
+							public void onFailure() {
+								// return to original state and notify user
+								checkbox.setEnabled(true);
+								checkbox.setValue(true);
+								task.complete(
+										"Could not remove person from the list.",
+										Status.failure);
+							}
 
-						@Override
-						public void onSuccess(RosterItem result) {
-							// enable the checkbox again
-							checkbox.setEnabled(true);
-							task.complete("", Status.succes);
-						}
+							@Override
+							public void onSuccess(RosterItem result) {
+								// enable the checkbox again
+								checkbox.setEnabled(true);
+								task.complete("", Status.succes);
+							}
 
-					});
+						}); }
+
 				}
+			
+			} catch (Exception e){
+				AlertDialog.getInstance().showDialog("exception was in the checkbox init", "exception");
 			}
-
-		});
+			}
+		}); 
+		
+		
 
 		// if this person is already on the list make sure the checkbox is
 		// checked
+
+		
 		if (listed != null && list.length() > 0 && listed.contains(list)) {
 			checkbox.setValue(true);
 		} else if (value == true) {

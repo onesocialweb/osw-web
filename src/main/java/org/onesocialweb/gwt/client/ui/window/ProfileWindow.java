@@ -17,7 +17,6 @@
 package org.onesocialweb.gwt.client.ui.window;
 
 import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addHTMLLabelRow;
-import static org.onesocialweb.gwt.client.util.FormLayoutHelper.addWidgetRow;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,8 +26,8 @@ import java.util.List;
 import org.onesocialweb.gwt.client.OswClient;
 import org.onesocialweb.gwt.client.i18n.UserInterfaceText;
 import org.onesocialweb.gwt.client.task.DefaultTaskInfo;
-import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.task.TaskInfo.Status;
+import org.onesocialweb.gwt.client.task.TaskMonitor;
 import org.onesocialweb.gwt.client.ui.application.AbstractApplication;
 import org.onesocialweb.gwt.client.ui.dialog.AlertDialog;
 import org.onesocialweb.gwt.client.ui.widget.ListSelector;
@@ -39,6 +38,7 @@ import org.onesocialweb.gwt.client.ui.widget.activity.FeedPanel;
 import org.onesocialweb.gwt.service.OswService;
 import org.onesocialweb.gwt.service.OswServiceFactory;
 import org.onesocialweb.gwt.service.RequestCallback;
+import org.onesocialweb.gwt.service.Roster;
 import org.onesocialweb.gwt.service.RosterEvent;
 import org.onesocialweb.gwt.service.RosterItem;
 import org.onesocialweb.gwt.service.Stream;
@@ -46,18 +46,15 @@ import org.onesocialweb.gwt.util.HtmlHelper;
 import org.onesocialweb.gwt.util.Observer;
 import org.onesocialweb.model.activity.ActivityEntry;
 import org.onesocialweb.model.vcard4.BirthdayField;
-import org.onesocialweb.model.vcard4.DefaultGenderField;
 import org.onesocialweb.model.vcard4.EmailField;
 import org.onesocialweb.model.vcard4.FullNameField;
 import org.onesocialweb.model.vcard4.GenderField;
 import org.onesocialweb.model.vcard4.NameField;
 import org.onesocialweb.model.vcard4.NoteField;
-import org.onesocialweb.model.vcard4.PhotoField;
 import org.onesocialweb.model.vcard4.Profile;
 import org.onesocialweb.model.vcard4.TelField;
 import org.onesocialweb.model.vcard4.URLField;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,7 +66,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
-import com.reveregroup.gwt.imagepreloader.FitImage;
 
 public class ProfileWindow extends AbstractWindow {
 
@@ -446,6 +442,7 @@ public class ProfileWindow extends AbstractWindow {
 		StyledLabel profileLabel = new StyledLabel("grouplabel", uiText.Profile());
 		StyledLabel profileInstruction = new StyledLabel("instruction", "");
 		details.add(sectionProfile);
+		
 		sectionProfile.add(profileLabel);
 		sectionProfile.add(profileInstruction);
 		sectionProfile.add(profile);
@@ -739,7 +736,6 @@ public class ProfileWindow extends AbstractWindow {
 		sectionLists.add(listSelector);
 
 		manage.add(sectionLists);
-
 		// Add the relations
 		/*
 		 * StyledFlowPanel sectionRelations = new StyledFlowPanel("section");
